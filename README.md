@@ -206,7 +206,7 @@ mask = (prediction[0] > 0.5).astype(np.uint8) * 255
 #### Accuracy Metrics
 **Analysis:**
 - **Training Accuracy:** Improves from 78% → 88%
-- **Validation Accuracy:** Improves from 63% → 92%
+- **Validation Accuracy:** Improves from 63% → 93%
 - **Performance:** Validation accuracy overtakes training accuracy, showing excellent generalization
 - **Plateau:** Accuracy stabilizes around epoch 15
 
@@ -223,7 +223,7 @@ mask = (prediction[0] > 0.5).astype(np.uint8) * 255
 ```
 Validation Results:
 ├── Loss: 0.1834
-├── Accuracy: 92.14%
+├── Accuracy: 93.14%
 ├── Precision: 92.31%
 └── Recall: 89.76%
 ```
