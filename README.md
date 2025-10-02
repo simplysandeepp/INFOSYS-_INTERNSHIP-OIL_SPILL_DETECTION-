@@ -853,9 +853,9 @@ If you use this code in your research, please cite:
 ```bibtex
 @software{oil_spill_detection_2024,
   title = {Enhanced U-Net for Oil Spill Detection},
-  author = {[Your Name]},
-  year = {2024},
-  url = {[Your Repository URL]}
+  author = {[Sandeep Prajapati]},
+  year = {2025},
+  url = {[https://github.com/simplysandeepp/INFOSYS-_INTERNSHIP-OIL_SPILL_DETECTION-.git]}
 }
 ```
 
