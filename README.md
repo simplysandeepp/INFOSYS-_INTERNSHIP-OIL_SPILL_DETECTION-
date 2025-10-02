@@ -101,33 +101,6 @@ This balanced split ensures the model learns well during training and also gener
 
 ## Installation
 
-### Requirements
-
-```bash
-# Core dependencies (pre-installed in Google Colab)
-tensorflow>=2.12.0
-numpy>=1.23.0
-pandas>=1.5.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-opencv-python>=4.7.0
-scikit-learn>=1.2.0
-Pillow>=9.4.0
-```
-
-### Setup in Google Colab
-
-```python
-# Mount Google Drive
-from google.colab import drive
-drive.mount('/content/drive')
-
-# All other dependencies are pre-installed in Colab
-# No additional installation required!
-```
-
----
-
 ### Cell 1: Google Drive Mounting
 
 **Purpose**: Connect to Google Drive to access the dataset stored there.
@@ -149,17 +122,6 @@ drive.mount('/content/drive')
 **Purpose**: Import libraries, configure GPU, set hyperparameters, and verify dataset paths.
 
 #### 2.1 Library Imports
-
-```python
-import os, numpy as np, pandas as pd, matplotlib.pyplot as plt, seaborn as sns
-from pathlib import Path
-import cv2
-from PIL import Image
-import random
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
-```
 
 **Key Libraries:**
 - **NumPy**: Numerical operations and array manipulation
@@ -238,31 +200,7 @@ DISABLE_EARLY_STOPPING = False  # Set True for guaranteed full training
 
 #### 3.1 Image Path Loading
 
-```python
-def load_image_paths(image_dir, mask_dir, subset=1.0):
-    """Load and optionally subsample image-mask pairs"""
-    if not os.path.exists(image_dir):
-        raise FileNotFoundError(f"Image directory not found: {image_dir}")
-    
-    image_files = sorted([f for f in os.listdir(image_dir) 
-                         if f.lower().endswith(('.jpg', '.jpeg'))])
-    mask_files = sorted([f for f in os.listdir(mask_dir) 
-                        if f.lower().endswith('.png')])
-    
-    if subset < 1.0:
-        n_samples = int(len(image_files) * subset)
-        indices = random.sample(range(len(image_files)), n_samples)
-        image_files = [image_files[i] for i in indices]
-        mask_files = [mask_files[i] for i in indices]
-    
-    image_paths = [os.path.join(image_dir, f) for f in image_files]
-    mask_paths = [os.path.join(mask_dir, f) for f in mask_files]
-    
-    return image_paths, mask_paths
-```
-### Dataset Distribution
-
-## 2. Data Characteristics – Coverage, Brightness, Contrast
+## Data Characteristics – Coverage, Brightness, Contrast
 This distribution graph shows three aspects:
 
 - **Oil spill coverage %** – Average coverage is about **75%**, meaning most images have large spill regions.  
@@ -280,26 +218,6 @@ This helps ensure the model doesn’t overfit to only one type of image.
 
 #### 3.2 Image Preprocessing
 
-```python
-def load_and_preprocess_image(image_path, mask_path, 
-                              img_size=(IMG_HEIGHT, IMG_WIDTH)):
-    """Load, resize, and normalize images"""
-    # Load image
-    img = tf.io.read_file(image_path)
-    img = tf.image.decode_jpeg(img, channels=IMG_CHANNELS)
-    img = tf.image.resize(img, img_size)
-    img = tf.cast(img, tf.float32) / 255.0  # Normalize to [0,1]
-    
-    # Load mask
-    mask = tf.io.read_file(mask_path)
-    mask = tf.image.decode_png(mask, channels=1)
-    mask = tf.image.resize(mask, img_size)
-    mask = tf.cast(mask, tf.float32) / 255.0
-    mask = tf.cast(mask > 0.5, tf.float32)  # Binarize
-    
-    return img, mask
-```
-
 **Key Steps:**
 1. **Reading**: TensorFlow's efficient file I/O
 2. **Decoding**: Format-specific decoders (JPEG for images, PNG for masks)
@@ -309,80 +227,12 @@ def load_and_preprocess_image(image_path, mask_path,
 
 #### 3.3 Advanced Data Augmentation
 
-```python
-@tf.function
-def apply_advanced_augmentation(img, mask):
-    """Apply random augmentations to increase dataset diversity"""
-    
-    # Horizontal flip (50% chance)
-    if tf.random.uniform(()) > 0.5:
-        img = tf.image.flip_left_right(img)
-        mask = tf.image.flip_left_right(mask)
-    
-    # Vertical flip (50% chance)
-    if tf.random.uniform(()) > 0.5:
-        img = tf.image.flip_up_down(img)
-        mask = tf.image.flip_up_down(mask)
-    
-    # Random rotation (0°, 90°, 180°, 270°)
-    k = tf.random.uniform(shape=[], minval=0, maxval=4, dtype=tf.int32)
-    img = tf.image.rot90(img, k=k)
-    mask = tf.image.rot90(mask, k=k)
-    
-    # Brightness adjustment (±10%)
-    img = tf.image.random_brightness(img, max_delta=0.1)
-    
-    # Contrast adjustment (90-110%)
-    img = tf.image.random_contrast(img, lower=0.9, upper=1.1)
-    
-    # Clip to valid range
-    img = tf.clip_by_value(img, 0.0, 1.0)
-    
-    return img, mask
-```
-
 **Why Augmentation?**
 - **Prevents Overfitting**: Model learns invariant features
 - **Increases Dataset Size**: Effectively 8× more training samples
 - **Improves Generalization**: Better performance on unseen data
 
-**@tf.function Decorator:**
-- Compiles function into TensorFlow graph
-- ~10× faster execution
-- Enables GPU acceleration
-
 #### 3.4 TensorFlow Dataset Creation
-
-```python
-def create_dataset(image_paths, mask_paths, batch_size=BATCH_SIZE, 
-                  augment=False, cache=True):
-    """Create optimized tf.data pipeline"""
-    
-    dataset = tf.data.Dataset.from_tensor_slices((image_paths, mask_paths))
-    
-    # Shuffle training data
-    if augment:
-        dataset = dataset.shuffle(buffer_size=len(image_paths))
-    
-    # Load and preprocess
-    dataset = dataset.map(load_and_preprocess_image,
-                         num_parallel_calls=tf.data.AUTOTUNE)
-    
-    # Apply augmentation
-    if augment:
-        dataset = dataset.map(apply_advanced_augmentation,
-                             num_parallel_calls=tf.data.AUTOTUNE)
-    
-    # Cache in memory
-    if cache:
-        dataset = dataset.cache()
-    
-    # Batch and prefetch
-    dataset = dataset.batch(batch_size)
-    dataset = dataset.prefetch(tf.data.AUTOTUNE)
-    
-    return dataset
-```
 
 **Optimization Techniques:**
 - **Parallel Map**: Utilizes all CPU cores
@@ -394,39 +244,6 @@ def create_dataset(image_paths, mask_paths, batch_size=BATCH_SIZE,
 - **3-5× faster training** compared to naive loading
 - **Eliminates CPU bottleneck** in data pipeline
 
-#### 3.5 Visualization 1: Dataset Distribution
-
-```python
-def visualize_dataset_distribution(train_images, val_images, test_images=None):
-    """Bar chart showing train/val/test split"""
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    
-    datasets = ['Training', 'Validation']
-    counts = [len(train_images), len(val_images)]
-    colors = ['#2ecc71', '#3498db']
-    
-    if test_images:
-        datasets.append('Test')
-        counts.append(len(test_images))
-        colors.append('#e74c3c')
-    
-    bars = ax.bar(datasets, counts, color=colors, edgecolor='black', 
-                  linewidth=2, alpha=0.8)
-    ax.set_ylabel('Number of Images', fontweight='bold', fontsize=12)
-    ax.set_title('Dataset Distribution', fontsize=16, fontweight='bold')
-    ax.grid(axis='y', alpha=0.3, linestyle='--')
-    
-    # Add count labels
-    for bar in bars:
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
-                f'{int(height)}', ha='center', va='bottom', 
-                fontweight='bold', fontsize=14)
-    
-    plt.tight_layout()
-    plt.savefig('visualizations/01_dataset_distribution.png', dpi=150)
-    plt.show()
-```
 
 ---
 
@@ -443,34 +260,7 @@ The attention mechanism helps the model focus on relevant features while suppres
 2. **Improves Boundary Detection**: Focuses on edges and transitions
 3. **Reduces False Positives**: Ignores irrelevant spatial locations
 
-#### 4.2 Residual Convolutional Block
-
-Residual connections solve the vanishing gradient problem, enabling deeper networks that converge faster and achieve better performance.
-
-**Why Residual Connections?**
-- **Solves Vanishing Gradients**: Direct path for gradient flow
-- **Enables Deeper Networks**: Can stack 100+ layers effectively
-- **Faster Convergence**: Learns residual (difference) rather than full mapping
-
-#### 4.3 Complete U-Net Model
-
-**Architecture Summary:**
-- **Input**: 256×256×3 RGB image
-- **Encoder**: 64 → 128 → 256 → 512 filters (4 levels)
-- **Bridge**: 1024 filters (deepest features)
-- **Decoder**: 512 → 256 → 128 → 64 filters (4 levels)
-- **Output**: 256×256×1 binary mask (sigmoid)
-
-**Total Parameters**: ~31 million (trainable)
-
-#### 4.4 Loss Functions and Metrics
-
-**Why Combined Loss?**
-- **BCE**: Handles class imbalance (more non-spill pixels)
-- **Dice**: Focuses on region overlap (critical for segmentation)
-- **Synergy**: BCE provides pixel accuracy, Dice ensures shape matching
-
-#### 4.5 Model Compilation
+#### 4.2 Model Compilation
 
 **Optimizer: AdamW**
 - **Adam**: Adaptive Moment Estimation (combines momentum + RMSProp)
@@ -514,7 +304,7 @@ Residual connections solve the vanishing gradient problem, enabling deeper netwo
 ### Learning Rate
 ![Alt text](assets/learning_rate_graph.png)
 
-### 4. Learning Rate Graph
+### Learning Rate Graph
 - At the beginning, the learning rate **gradually increases** during the first 5 epochs (warm-up).  
 - Then it flattens to the optimal value, allowing the model to learn effectively without overshooting.  
 
@@ -526,7 +316,6 @@ Residual connections solve the vanishing gradient problem, enabling deeper netwo
 #### 5.2 Early Stopping (Patient Version)
 
 **Why 20 Epoch Patience?**
-- **Allows Plateau Escape**: Model can temporarily stagnate then improve
 - **Prevents Premature Stopping**: Previous issue with 10 epoch patience
 - **Better Convergence**: Reaches true optimal performance
 
@@ -568,11 +357,14 @@ Minimum:   0.0000001
 3. **Confidence**: Heatmap showing model certainty (blue=low, red=high)
 4. **Prediction**: Thresholded binary mask (0.5 cutoff)
 5. **Overlay**: Red regions show detected oil spills on original image
+   
 ![Alt text](assets/prediction.png)
 
 
-## 6. Confusion Matrix
+### Confusion Matrix
+
 ![Alt text](assets/confusion_matrix.png)
+
 - Most *“no spill”* and *“spill”* cases are classified correctly.  
 - **94.4% recall** for oil spill detection → model rarely misses a spill.  
 - Few misclassifications compared to total → strong reliability.  
@@ -586,8 +378,9 @@ No Spill  │    TN    │   FP    │
 Spill     │    FN    │   TP    │
 ```
 
-## 7. Heatmap (Segmentation Quality)
+### Heatmap (Segmentation Quality)
 IoU heatmap across the dataset:
+
 ![Alt text](assets/heatmap.png)
 
 - **Green** → very high IoU (accurate segmentations).  
@@ -596,7 +389,7 @@ IoU heatmap across the dataset:
 
 --- 
 
-## Best and Worst Prediction
+### Best and Worst Prediction
 ![Alt text](assets/best_worst_prediction.png)
 
 **Analysis Value:**
@@ -619,7 +412,17 @@ Based on the enhanced architecture and training strategy, you should achieve:
 | **Precision** | 0.93-0.96 | 0.91-0.94 | 0.90-0.93 |
 | **Recall** | 0.91-0.94 | 0.89-0.92 | 0.88-0.91 |
 
-![Alt text](assets/training_outout_graph.png)
+---
+
+## Training Performance Graphs (Loss, Accuracy, Dice, IoU, Precision, Recall).
+
+- Loss curve goes down steadily, showing effective learning. 
+- Accuracy reaches above 95% for validation. 
+- Dice coefficient stabilizes around 0.90+, which means strong overlap with ground truth masks. 
+- IoU improves above 0.84, confirming precise segmentation. 
+- Precision and Recall both reach above 0.90, meaning the model is not only detecting spills but also minimizing false positives and false negatives.
+
+ ![Alt text](assets/training_outout_graph.png)
 
 ### Training Timeline
 
