@@ -63,42 +63,6 @@ This project implements a state-of-the-art semantic segmentation model for detec
 
 ---
 
-## Architecture
-
-### Enhanced U-Net Structure
-
-```
-Input (256x256x3)
-    ↓
-Encoder Block 1 (64 filters) ──→ Skip Connection 1
-    ↓ MaxPool                         ↓
-Encoder Block 2 (128 filters) ─→ Skip Connection 2
-    ↓ MaxPool                         ↓
-Encoder Block 3 (256 filters) ─→ Skip Connection 3
-    ↓ MaxPool                         ↓
-Encoder Block 4 (512 filters) ─→ Skip Connection 4
-    ↓ MaxPool                         ↓
-Bridge (1024 filters)
-    ↓ Upsample
-Decoder Block 1 (512) ←─ Attention Gate 4 ←─┘
-    ↓ Upsample
-Decoder Block 2 (256) ←─ Attention Gate 3 ←─┘
-    ↓ Upsample
-Decoder Block 3 (128) ←─ Attention Gate 2 ←─┘
-    ↓ Upsample
-Decoder Block 4 (64) ←── Attention Gate 1 ←─┘
-    ↓
-Output (256x256x1) - Sigmoid Activation
-```
-
-**Key Components:**
-- **Residual Blocks**: Each conv block includes skip connections
-- **Attention Gates**: Focus on relevant features before concatenation
-- **Dropout**: Applied in encoder levels 2-4 (20% rate) for regularization
-- **Batch Normalization**: After each convolution for stable training
-
----
-
 ## Dataset Structure
 
 ```
@@ -116,6 +80,17 @@ Dataset/
 ```
 ## Dataset Classification
 ![Alt text](assets/data_distribution.png)
+
+## 1. Dataset Distribution
+Here we see a bar graph showing how the dataset was split:
+
+- **Training set**: 811 images (maximum)  
+- **Validation set**: 203 images  
+- **Test set**: 254 images  
+
+This balanced split ensures the model learns well during training and also generalizes properly when tested on unseen data.
+
+---
 
 **Requirements:**
 - Images: RGB format (.jpg/.jpeg)
@@ -152,8 +127,6 @@ drive.mount('/content/drive')
 ```
 
 ---
-
-## Detailed Code Walkthrough
 
 ### Cell 1: Google Drive Mounting
 
@@ -217,10 +190,6 @@ if gpus:
 - **Reduced memory usage** (16-bit vs 32-bit floats)
 - **Maintained accuracy** (loss computed in FP32)
 
-**Why Memory Growth?**
-- Prevents TensorFlow from allocating all GPU memory upfront
-- Allows other processes to use GPU
-- Prevents Out-of-Memory (OOM) errors
 
 #### 2.3 Dataset Path Configuration
 
@@ -236,17 +205,6 @@ VAL_IMAGES = os.path.join(VAL_DIR, 'images')
 VAL_MASKS = os.path.join(VAL_DIR, 'masks')
 TEST_IMAGES = os.path.join(TEST_DIR, 'images')
 TEST_MASKS = os.path.join(TEST_DIR, 'masks')
-```
-
-**Path Verification:**
-```python
-for dir_path, dir_name in [(TRAIN_IMAGES, 'Train Images'), ...]:
-    if os.path.exists(dir_path):
-        file_count = len([f for f in os.listdir(dir_path) 
-                         if os.path.isfile(os.path.join(dir_path, f))])
-        print(f"✓ {dir_name}: {file_count} files")
-    else:
-        print(f"✗ {dir_name}: NOT FOUND!")
 ```
 
 This ensures all required directories exist before training begins.
@@ -271,17 +229,6 @@ DISABLE_EARLY_STOPPING = False  # Set True for guaranteed full training
 - **LR 0.0001**: Prevents overshooting optimal weights
 - **30 Epochs**: Sufficient for convergence with early stopping
 - **Warmup**: Prevents early training instability
-
-#### 2.5 Directory Creation
-
-```python
-os.makedirs('models', exist_ok=True)
-os.makedirs('results', exist_ok=True)
-os.makedirs('visualizations', exist_ok=True)
-os.makedirs('logs', exist_ok=True)
-```
-
-Creates output folders for saved models, results, visualizations, and TensorBoard logs.
 
 ---
 
@@ -314,6 +261,16 @@ def load_image_paths(image_dir, mask_dir, subset=1.0):
     return image_paths, mask_paths
 ```
 ### Dataset Distribution
+
+## 2. Data Characteristics – Coverage, Brightness, Contrast
+This distribution graph shows three aspects:
+
+- **Oil spill coverage %** – Average coverage is about **75%**, meaning most images have large spill regions.  
+- **Brightness distribution** – Dataset has a good range of illumination.  
+- **Contrast distribution** – Dataset includes variety in water textures.  
+
+This helps ensure the model doesn’t overfit to only one type of image.
+![Alt text](assets/distribution_graph.png)
 ![Alt text](assets/dataset_distribution.png)
 
 **Features:**
@@ -342,8 +299,6 @@ def load_and_preprocess_image(image_path, mask_path,
     
     return img, mask
 ```
-
-![Alt text](assets/model_layer_distribution.png)
 
 **Key Steps:**
 1. **Reading**: TensorFlow's efficient file I/O
@@ -385,7 +340,6 @@ def apply_advanced_augmentation(img, mask):
     
     return img, mask
 ```
-![Alt text](assets/distribution_graph.png)
 
 **Why Augmentation?**
 - **Prevents Overfitting**: Model learns invariant features
@@ -474,25 +428,6 @@ def visualize_dataset_distribution(train_images, val_images, test_images=None):
     plt.show()
 ```
 
-**Output**: [Image will be added here]
-
-**Purpose**: Verify balanced dataset split and identify potential data imbalance.
-
-#### 3.6 Visualization 2: Sample Images with Masks
-
-**Output**: [Image will be added here]
-
-**Purpose**: Visually inspect data quality and annotation accuracy.
-
-#### 3.7 Visualization 3: Data Statistics
-
-**Output**: [Image will be added here]
-
-**Purpose**: Understand dataset characteristics:
-- **Coverage**: Percentage of pixels containing oil spills
-- **Brightness**: Overall image illumination
-- **Contrast**: Pixel intensity variation
-
 ---
 
 ### Cell 4: Enhanced U-Net Model Architecture
@@ -549,6 +484,21 @@ Residual connections solve the vanishing gradient problem, enabling deeper netwo
 4. **Precision**: True Positives / (True Positives + False Positives)
 5. **Recall**: True Positives / (True Positives + False Negatives)
 
+**Total Layers = 118**
+
+1. Input Layer → 1  
+2. Conv2D → 44  
+3. Batch Normalization → 18  
+4. Activation → 26  
+5. Add (Residual connections) → 13  
+6. MaxPooling2D → 4  
+7. Dropout → 4  
+8. Conv2DTranspose (Up sampling) → 4  
+9. Multiply (Attention gates) → 4  
+10. Concatenate (Skip connections) → 4 
+
+![Alt text](assets/model_layer_distribution.png)
+
 ---
 
 ### Cell 5: Training with Advanced Callbacks
@@ -561,6 +511,13 @@ Residual connections solve the vanishing gradient problem, enabling deeper netwo
 - **Prevents Early Instability**: Random initialization can cause large gradients
 - **Smooth Start**: Gradually "wakes up" the network
 - **Better Final Performance**: Avoids bad local minima early in training
+### Learning Rate
+![Alt text](assets/learning_rate_graph.png)
+
+### 4. Learning Rate Graph
+- At the beginning, the learning rate **gradually increases** during the first 5 epochs (warm-up).  
+- Then it flattens to the optimal value, allowing the model to learn effectively without overshooting.  
+
 
 **Schedule:**
 - Epochs 1-5: LR increases from 0.00001 → 0.0001
@@ -597,16 +554,6 @@ Minimum:   0.0000001
 - Epoch 11-20: Refinement (Dice: 0.85 → 0.92)
 - Epoch 21-30: Fine-tuning (Dice: 0.92 → 0.95+)
 
-#### 5.5 Visualization 5: Training History
-
-**Output**: [Image will be added here]
-
-**What to Look For:**
-- **Convergence**: Both curves plateau
-- **Overfitting**: Train improves but validation degrades
-- **Underfitting**: Both curves still improving at end
-- **Optimal Point**: Green star marks best validation performance
-
 ---
 
 ### Cell 6: Comprehensive Evaluation and Visualizations
@@ -615,18 +562,20 @@ Minimum:   0.0000001
 
 #### 6.1 Detailed Prediction Visualization
 
-**Output**: [Image will be added here]
-
 **Column Interpretation:**
 1. **Original**: Input satellite/aerial image
 2. **Ground Truth**: Expert-annotated oil spill mask
 3. **Confidence**: Heatmap showing model certainty (blue=low, red=high)
 4. **Prediction**: Thresholded binary mask (0.5 cutoff)
 5. **Overlay**: Red regions show detected oil spills on original image
+![Alt text](assets/prediction.png)
 
-#### 6.2 Confusion Matrix
 
-**Output**: [Image will be added here]
+## 6. Confusion Matrix
+![Alt text](assets/confusion_matrix.png)
+- Most *“no spill”* and *“spill”* cases are classified correctly.  
+- **94.4% recall** for oil spill detection → model rarely misses a spill.  
+- Few misclassifications compared to total → strong reliability.  
 
 **Matrix Interpretation:**
 ```
@@ -637,24 +586,22 @@ No Spill  │    TN    │   FP    │
 Spill     │    FN    │   TP    │
 ```
 
-#### 6.3 Quality Heatmap
+## 7. Heatmap (Segmentation Quality)
+IoU heatmap across the dataset:
+![Alt text](assets/heatmap.png)
 
-**Output**: [Image will be added here]
+- **Green** → very high IoU (accurate segmentations).  
+- **Yellow/Red** → weaker cases.  
+- IoU ranges from **0.31 (lowest)** to **0.84 (best)**. 
 
-**Color Legend:**
-- **Green**: Excellent segmentation (IoU > 0.8)
-- **Yellow**: Good segmentation (IoU 0.6-0.8)
-- **Red**: Poor segmentation (IoU < 0.6)
+--- 
 
-#### 6.4 Best vs Worst Predictions
-
-**Output**: [Image will be added here]
+## Best and Worst Prediction
+![Alt text](assets/best_worst_prediction.png)
 
 **Analysis Value:**
-- **Worst Cases**: Reveal model weaknesses (e.g., small spills, complex backgrounds)
-- **Best Cases**: Show model strengths (e.g., clear boundaries, high contrast)
-- **Pattern Recognition**: Identify systematic failures vs. random errors
-- **Improvement Targets**: Guide future data augmentation or architecture changes
+- **Worst cases** (left): IoU close to 0 → failures in tiny spills or confusing water textures.  
+- **Best cases** (right): IoU **0.77–0.84+**, near-perfect segmentation. 
 
 ---
 
@@ -672,7 +619,6 @@ Based on the enhanced architecture and training strategy, you should achieve:
 | **Precision** | 0.93-0.96 | 0.91-0.94 | 0.90-0.93 |
 | **Recall** | 0.91-0.94 | 0.89-0.92 | 0.88-0.91 |
 
-![Alt text](assets/prediction.png)
 ![Alt text](assets/training_outout_graph.png)
 
 ### Training Timeline
@@ -695,153 +641,6 @@ Epoch 16-25: Fine-tuning phase
 Epoch 26-30: Convergence
   Dice: 0.92 → 0.95
   Loss: 0.12 → 0.09
-```
-
-## Best and Worst Prediction
-![Alt text](assets/best_worst_prediction.png)
-
----
-
----
-## Visualizations
-
-### Confusion Matrix
-![Alt text](assets/confusion_matrix.png)
-
-### Learning Rate
-![Alt text](assets/learning_rate_graph.png)
-
-### Heatmap
-![Alt text](assets/heatmap.png)
-
---- 
-
-## Usage
-
-### Basic Training
-
-```python
-# 1. Mount Drive and verify paths
-from google.colab import drive
-drive.mount('/content/drive')
-
-# 2. Run all cells in sequence
-# Cell 1: Mount Drive
-# Cell 2: Setup and Configuration
-# Cell 3: Data Loading and Preprocessing
-# Cell 4: Model Architecture
-# Cell 5: Training
-# Cell 6: Evaluation
-
-# 3. Training starts automatically after Cell 5
-```
-
-### Loading Pre-trained Model
-
-```python
-from tensorflow import keras
-
-# Load best model
-model = keras.models.load_model('models/best_model.h5', 
-                                custom_objects={
-                                    'combined_loss': combined_loss,
-                                    'dice_coefficient': dice_coefficient,
-                                    'iou_metric': iou_metric
-                                })
-
-# Make predictions
-img = cv2.imread('test_image.jpg')
-img = cv2.resize(img, (256, 256))
-img = img.astype(np.float32) / 255.0
-img = np.expand_dims(img, axis=0)
-
-prediction = model.predict(img)
-mask = (prediction[0].squeeze() > 0.5).astype(np.uint8) * 255
-```
-
-### Prediction on New Images
-
-```python
-def predict_oil_spill(image_path, model, threshold=0.5):
-    """Predict oil spill on new image"""
-    # Load and preprocess
-    img = cv2.imread(image_path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    original_size = img.shape[:2]
-    img_resized = cv2.resize(img, (256, 256))
-    img_normalized = img_resized.astype(np.float32) / 255.0
-    img_input = np.expand_dims(img_normalized, axis=0)
-    
-    # Predict
-    pred_prob = model.predict(img_input, verbose=0)[0].squeeze()
-    pred_binary = (pred_prob > threshold).astype(np.uint8) * 255
-    
-    # Resize back to original
-    pred_binary = cv2.resize(pred_binary, (original_size[1], original_size[0]))
-    pred_prob = cv2.resize(pred_prob, (original_size[1], original_size[0]))
-    
-    # Create overlay
-    overlay = img.copy()
-    overlay[pred_binary > 127] = [255, 0, 0]
-    blended = cv2.addWeighted(img, 0.7, overlay, 0.3, 0)
-    
-    # Calculate statistics
-    total_pixels = pred_binary.size
-    spill_pixels = np.sum(pred_binary > 127)
-    spill_percentage = (spill_pixels / total_pixels) * 100
-    avg_confidence = np.mean(pred_prob[pred_binary > 127]) if spill_pixels > 0 else 0
-    
-    return {
-        'binary_mask': pred_binary,
-        'confidence_map': pred_prob,
-        'overlay': blended,
-        'spill_detected': spill_pixels > 0,
-        'spill_percentage': spill_percentage,
-        'average_confidence': avg_confidence
-    }
-
-# Example usage
-result = predict_oil_spill('new_image.jpg', model)
-print(f"Oil Spill Detected: {result['spill_detected']}")
-print(f"Coverage: {result['spill_percentage']:.2f}%")
-print(f"Confidence: {result['average_confidence']:.2f}")
-```
-
----
-
-## Troubleshooting
-
-### Issue 1: Out of Memory (OOM) Error
-
-**Solutions:**
-```python
-# Option 1: Reduce batch size
-BATCH_SIZE = 4  # Instead of 8
-
-# Option 2: Reduce image size
-IMG_HEIGHT = 128
-IMG_WIDTH = 128
-
-# Option 3: Disable caching
-dataset = create_dataset(image_paths, mask_paths, cache=False)
-```
-
-### Issue 2: Training Stops Too Early
-
-**Solutions:**
-```python
-# Option 1: Disable early stopping completely
-DISABLE_EARLY_STOPPING = True
-
-# Option 2: Increase patience
-early_stopping = EarlyStopping(patience=30)
-```
-
-### Issue 3: Poor Performance on Test Set
-
-**Solutions:**
-```python
-# More aggressive augmentation or increased dropout rate
 ```
 
 ---
@@ -881,3 +680,10 @@ For questions or issues:
 - Open an issue on GitHub
 - Email: [contact@sandeepp.in]
 - Project Link: [https://sandeepp.in/]
+
+  ---
+
+# 🙏 Thank You!  
+
+<img src="https://user-images.githubusercontent.com/74038190/225813708-98b745f2-7d22-48cf-9150-083f1b00d6c9.gif" width="500">
+<br><br>
