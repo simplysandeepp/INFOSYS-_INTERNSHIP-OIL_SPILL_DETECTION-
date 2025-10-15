@@ -613,7 +613,7 @@ Stop the app with Ctrl+C in the terminal.
 
 2. Create remote repo on GitHub and push:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/oil-spill-detection.git
+   git remote add origin https://github.com/simplysandeepp/oil-spill-detection-.git
    git branch -M main
    git push -u origin main
    ```
@@ -782,7 +782,7 @@ The deployed web app provides a simple interface where users can upload an image
 ## 🖼️ Screenshots
 
 ### 1️⃣ Normal Deployed Website
-![Normal Website](assets\normal-website.png)
+![Normal Website](assets\website.png)
 
 ### 2️⃣ After Upload — Oil Spill Detected
 ![Oil Spill Detected](assets/oil-spill-detected.png)
