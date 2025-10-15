@@ -798,7 +798,6 @@ A breakdown of oil spill regions, confidence distribution, and visualization ove
 
 ## ⚙️ Installation & Setup
 
-```bash
 # 1️⃣ Clone the repository
 git clone https://github.com/<your-username>/oil-spill-detection.git
 cd oil-spill-detection
