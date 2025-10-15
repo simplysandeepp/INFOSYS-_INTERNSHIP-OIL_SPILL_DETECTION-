@@ -782,7 +782,7 @@ The deployed web app provides a simple interface where users can upload an image
 ## 🖼️ Screenshots
 
 ### 1️⃣ Normal Deployed Website
-![Normal Website](assets\website.png)
+![Normal Website](assets\website-front.png)
 
 ### 2️⃣ After Upload — Oil Spill Detected
 ![Oil Spill Detected](assets/oil-spill-detected.png)
