@@ -782,7 +782,7 @@ The deployed web app provides a simple interface where users can upload an image
 ## 🖼️ Screenshots
 
 ### 1️⃣ Normal Deployed Website
-![Oil Spill Detection System web app homepage showing a large gradient header reading Oil Spill Detection System, a central file uploader panel with placeholder text Upload an image to begin analysis, a drag and drop area labeled Drag and drop file here and a Browse files button; left sidebar titled About explains This application uses Deep Learning to detect oil spills in satellite/aerial imagery and lists How it works 1. Upload an image 2. AI model analyzes it 3. Get instant detection results; sidebar also shows Model Enhanced U-Net with Attention Gates and Accuracy ~95% and a Settings section with Confidence Threshold set to 0.50; dark themed professional interface with a clean confident and reassuring tone](assets\website-front.png)
+![Website Front page](assets/website-front.png)
 
 ### 2️⃣ After Upload — Oil Spill Detected
 ![Oil Spill Detected](assets/oil-spill-detected.png)
