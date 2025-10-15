@@ -420,6 +420,236 @@ Each square = one test image
 - Perfect segmentation
 
 ---
+## Phase 5.5 — From Trained Model to Local Deployment
+
+This document describes steps to export a trained model from Colab, prepare a local project, and deploy a Streamlit app that performs oil-spill detection.
+
+---
+
+## Table of contents
+- Step 1 — Save trained model in Colab
+- Step 2 — Upload model to Google Drive
+- Step 3 — Setup project in VS Code
+- Step 4 — Create deployment files (overview)
+- Step 5 — Run locally
+- Step 6 — Push to GitHub
+- Quick reference commands
+- Local deployment checklist
+
+---
+
+## Step 1 — Save trained model in Colab
+
+After training finishes in Colab, save and download the model:
+
+```python
+# Save model (example)
+model.save('models/best_model.h5')
+
+# Download to local machine
+from google.colab import files
+files.download('models/best_model.h5')
+```
+
+About the `.h5` file
+- Format: HDF5 (Hierarchical Data Format)
+- Contains model architecture + weights (or only weights depending on how saved)
+- Typical size: ~400 MB for this project (31M parameters)
+
+---
+
+## Step 2 — Upload model to Google Drive
+
+Why: model files are too large for GitHub.
+
+Steps
+1. Upload `best_model.h5` to Google Drive.
+2. Right-click → Share → set to "Anyone with the link can view".
+3. Copy the share URL and extract the FILE_ID from:
+   `https://drive.google.com/file/d/FILE_ID/view`
+
+You will use FILE_ID in `utils/inference.py` (for `gdown` or Google Drive download).
+
+---
+
+## Step 3 — Setup project in VS Code
+
+Recommended folder structure:
+
+```
+oil-spill-detection/
+├── config/
+├── models/
+├── utils/
+├── notebooks/
+├── temp_uploads/
+├── app.py
+├── requirements.txt
+└── README.md
+```
+
+Create a Python virtual environment and install dependencies in Step 5.
+
+---
+
+## Step 4 — Create deployment files (overview)
+
+Below are the recommended files and their responsibilities.
+
+- config/config.py
+  - Settings: IMG_HEIGHT, IMG_WIDTH, MODEL_PATH, CONFIDENCE_THRESHOLD, overlay alpha, color settings.
+
+- models/model_architecture.py
+  - Re-create the exact U-Net (or custom) architecture used for training.
+  - Provide a factory function (e.g. `build_enhanced_unet()`).
+  - Necessary to load weights from the `.h5` file if the full model object was not saved.
+
+- utils/preprocessing.py
+  - load_and_preprocess_image(path_or_bytes) → resized, normalized tensor ready for model.
+  - postprocess_mask(pred) → binary mask or colored visualization.
+  - validate_image(file) → check type/size.
+
+- utils/inference.py
+  - Class `OilSpillDetector`:
+    - Downloads model from Google Drive (if not present).
+    - Builds architecture and loads weights.
+    - `predict(image)` → returns mask probabilities, binary mask, coverage %, and confidence stats.
+
+  Example usage in code:
+  ```python
+  detector = OilSpillDetector(file_id="YOUR_FILE_ID")
+  detector.load_model()
+  result = detector.predict(image)
+  ```
+
+- utils/visualization.py
+  - create_overlay(image, mask, alpha) → blended result with red overlay for spills.
+  - create_confidence_heatmap(probs) → colored heatmap of confidence.
+  - Utility to convert masks to displayable images (0–255).
+
+- app.py (Streamlit)
+  - Sidebar: project info, confidence threshold slider, overlay transparency slider, stats.
+  - Main: file uploader, show original image and results side-by-side.
+  - Result panel: detection status, overlay, coverage, avg/max confidence, detected pixels.
+  - Tabs: binary mask, confidence heatmap, raw JSON; download buttons.
+
+- requirements.txt
+  - Example packages:
+    ```
+    tensorflow>=2.16.0
+    opencv-python
+    Pillow
+    streamlit
+    numpy
+    gdown
+    matplotlib
+    ```
+
+- .gitignore
+  - Suggested entries:
+    ```
+    venv/
+    __pycache__/
+    *.h5
+    temp_uploads/
+    *.pyc
+    .DS_Store
+    ```
+
+---
+
+## Step 5 — Run locally
+
+1. Create virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+
+2. Activate venv
+   - PowerShell:
+     ```powershell
+     .\venv\Scripts\Activate.ps1
+     ```
+   - CMD:
+     ```cmd
+     venv\Scripts\activate
+     ```
+   - Mac/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Test model loading:
+   ```bash
+   python -c "from utils.inference import OilSpillDetector; print('OK')"
+   ```
+   - The first run may download model from Google Drive and take a few minutes.
+
+5. Run Streamlit app:
+   ```bash
+   streamlit run app.py
+   ```
+   - App opens at http://localhost:8501
+
+Stop the app with Ctrl+C in the terminal.
+
+---
+
+## Step 6 — Push to GitHub
+
+1. Initialize repo and commit:
+   ```bash
+   git init
+   git add .gitignore
+   git commit -m "Add gitignore"
+   git add .
+   git commit -m "Initial commit: Oil spill detection system"
+   ```
+
+2. Create remote repo on GitHub and push:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/oil-spill-detection.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+Notes
+- Keep `*.h5` excluded by `.gitignore`. Store model on Drive.
+- Include `gdown` in `requirements.txt` if you download from Drive programmatically.
+
+---
+
+## Quick reference commands
+
+```bash
+# Setup
+python -m venv venv
+.\venv\Scripts\Activate.ps1    # Windows PowerShell
+source venv/bin/activate       # Mac/Linux
+
+# Install
+pip install -r requirements.txt
+
+# Test
+python -c "from utils.inference import OilSpillDetector; print('Model loader OK')"
+
+# Run
+streamlit run app.py
+
+# Git
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin YOUR_REPO_URL
+git push -u origin main
+```
+
+---
 
 ### Phase 6: Deployment
 
@@ -530,6 +760,59 @@ Live at: sandeep-oilspills.streamlit.app ✅
 
 **Live Demo:** [https://sandeep-oilspills.streamlit.app/](https://sandeep-oilspills.streamlit.app/)
 
+---
+
+## 🚀 Project Overview
+
+The goal of this project is to accurately identify **oil spill regions** in satellite images using a trained segmentation model.  
+The deployed web app provides a simple interface where users can upload an image and instantly view the detection results, coverage metrics, and detailed analysis.
+
+---
+
+## 🧠 Model Workflow
+
+1. **Upload an Image** → User uploads a satellite image.  
+2. **Model Inference** → The trained CNN model performs pixel-wise prediction.  
+3. **Mask Generation** → Detected oil spill areas are highlighted on the image.  
+4. **Metrics Calculation** → Displays detection metrics such as coverage, average confidence, and detected pixels.  
+5. **Detailed Analysis** → Presents deeper insights into model predictions.
+
+---
+
+## 🖼️ Screenshots
+
+### 1️⃣ Normal Deployed Website
+![Normal Website](assets\normal-website.png)
+
+### 2️⃣ After Upload — Oil Spill Detected
+![Oil Spill Detected](assets/oil-spill-detected.png)
+
+### 3️⃣ 📊 Detection Metrics
+![Detection Metrics](assets/detection-metrics.png)
+
+### 4️⃣ Detailed Analysis
+A breakdown of oil spill regions, confidence distribution, and visualization overlays.  
+![Detailed Analysis](assets/detailed-analysis.png)
+
+---
+
+## ⚙️ Installation & Setup
+
+```bash
+# 1️⃣ Clone the repository
+git clone https://github.com/<your-username>/oil-spill-detection.git
+cd oil-spill-detection
+
+# 2️⃣ Create and activate a virtual environment
+python -m venv venv
+venv\Scripts\activate  # For Windows
+# source venv/bin/activate  # For Linux/Mac
+
+# 3️⃣ Install dependencies
+pip install -r requirements.txt
+
+# 4️⃣ Run the Streamlit app
+streamlit run app.py
 ---
 
 ## 🏆 Performance
