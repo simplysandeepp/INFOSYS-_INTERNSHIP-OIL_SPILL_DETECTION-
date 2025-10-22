@@ -1,5 +1,5 @@
 # ============================================================================
-# STREAMLIT_APP.PY - Complete Fixed Version with Image Gallery
+# STREAMLIT_APP.PY - Premium Crystal UI Version
 # ============================================================================
 
 import streamlit as st
@@ -34,12 +34,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ------------------------ PREMIUM REVAMPED STYLES ----------------------
+# ------------------------ PREMIUM CRYSTAL BLUE STYLES ----------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
-/* ================ GLOBAL RESETS & BASE STYLES ================ */
+/* ================ GLOBAL RESETS & BASE ================ */
 * {
     margin: 0;
     padding: 0;
@@ -49,11 +49,10 @@ st.markdown("""
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     scroll-behavior: smooth;
-    color: #1E1E1E;
 }
 
 .stApp {
-    background: linear-gradient(135deg, #F0F4FF 0%, #E3F2FD 50%, #EFF6FF 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
     background-attachment: fixed;
 }
 
@@ -69,15 +68,27 @@ header {visibility: hidden;}
 
 /* ================ HERO SECTION ================ */
 .hero-section {
-    background: #FFFFFF;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-radius: 24px;
     padding: 60px 40px;
     margin-bottom: 40px;
-    box-shadow: 0 8px 32px rgba(25, 118, 210, 0.12);
-    border: 2px solid rgba(25, 118, 210, 0.1);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.4);
     text-align: center;
     position: relative;
     animation: fadeInUp 0.8s ease-out;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 @keyframes fadeInUp {
@@ -88,192 +99,235 @@ header {visibility: hidden;}
 .hero-section h1 {
     font-family: 'Poppins', sans-serif;
     font-size: 3.5rem;
-    font-weight: 800;
-    color: #0D1B2A;
+    font-weight: 900;
+    color: #ffffff;
     margin-bottom: 20px;
     letter-spacing: -1px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+    position: relative;
 }
 
 .hero-section .emoji-icon {
     font-size: 4rem;
     margin-bottom: 15px;
     display: block;
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4));
 }
 
 .hero-section .subtitle {
     font-size: 1.25rem;
-    color: #2C3E50;
+    color: #e0f2fe;
     margin-bottom: 15px;
     font-weight: 400;
     line-height: 1.8;
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
 }
 
 .hero-section .author {
     font-size: 1.1rem;
-    color: #1976D2;
-    font-weight: 600;
+    color: #ffffff;
+    font-weight: 700;
     margin-top: 25px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     display: inline-block;
     border-radius: 50px;
-    border: 2px solid #1976D2;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    position: relative;
 }
 
-/* ================ IMAGE GALLERY STYLES ================ */
+/* ================ PREMIUM GALLERY STYLES ================ */
 .gallery-header {
-    background: #FFFFFF;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-radius: 20px;
-    padding: 30px;
-    margin: 40px 0 20px 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
+    padding: 40px;
+    margin: 40px 0 30px 0;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+.gallery-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+}
+
+.gallery-header p {
+    font-size: 1.2rem;
+    color: #e0f2fe;
+    font-weight: 500;
 }
 
 .gallery-success-message {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2E7D32;
-    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-    padding: 15px 25px;
-    border-radius: 12px;
-    border: 2px solid #4CAF50;
-    margin: 20px 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    padding: 20px 30px;
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    margin: 30px 0;
     text-align: center;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
 }
 
-.image-gallery-card {
-    background: #FFFFFF;
+/* ================ FILTER SECTION - DATE ONLY ================ */
+.filter-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-radius: 20px;
     padding: 30px;
-    margin: 25px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border: 3px solid #1976D2;
-    transition: all 0.4s ease;
+    margin: 20px 0;
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+.filter-section h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+/* ================ IMAGE GALLERY CARDS ================ */
+.image-gallery-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 24px;
+    padding: 35px;
+    margin: 30px 0;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: slideIn 0.6s ease-out;
 }
 
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateX(-30px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
     }
 }
 
 .image-gallery-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(25, 118, 210, 0.2);
-    border-color: #0D47A1;
+    transform: translateY(-8px);
+    box-shadow: 0 30px 80px rgba(59, 130, 246, 0.5);
+    border-color: #3b82f6;
 }
 
 .gallery-header-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 3px solid #1976D2;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 3px solid rgba(59, 130, 246, 0.5);
 }
 
 .gallery-filename {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0D1B2A;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
 }
 
 .gallery-timestamp {
-    color: #1E1E1E;
-    font-size: 1.1rem;
+    color: #e0f2fe;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-top: 5px;
+    margin-top: 8px;
 }
 
 .gallery-status-badge {
     display: inline-block;
-    padding: 12px 28px;
+    padding: 14px 32px;
     border-radius: 25px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .status-detected {
-    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
-    color: #FFFFFF;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
 }
 
 .status-clean {
-    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-    color: #FFFFFF;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
 }
 
 .gallery-metadata-box {
-    margin: 20px 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-    border-radius: 12px;
-    border: 2px solid #1976D2;
-    font-size: 1.1rem;
+    margin: 25px 0;
+    padding: 25px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 16px;
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    font-size: 1.15rem;
     font-weight: 600;
-    color: #0D1B2A;
-    line-height: 1.8;
+    color: #ffffff;
+    line-height: 2;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
 }
 
 .gallery-image-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-    margin-top: 25px;
+    gap: 30px;
+    margin-top: 30px;
 }
 
 .gallery-image-box {
     position: relative;
-    padding: 20px;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
-    border-radius: 16px;
-    border: 3px solid #1976D2;
+    padding: 25px;
+    background: rgba(30, 41, 59, 0.6);
+    border-radius: 20px;
+    border: 2px solid rgba(59, 130, 246, 0.5);
     transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .gallery-image-box:hover {
-    border-color: #0D47A1;
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(25, 118, 210, 0.2);
+    border-color: #3b82f6;
+    background: rgba(30, 41, 59, 0.8);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(59, 130, 246, 0.4);
 }
 
 .gallery-image-label {
-    font-weight: 800;
-    color: #0D1B2A;
+    font-weight: 900;
+    color: #ffffff;
     margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     text-align: center;
-    padding: 10px;
-    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
-    color: #FFFFFF;
-    border-radius: 10px;
+    padding: 14px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 .gallery-image-box img {
     width: 100%;
     height: auto;
     border-radius: 12px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     cursor: pointer;
     transition: transform 0.3s ease;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .gallery-image-box img:hover {
@@ -283,34 +337,34 @@ header {visibility: hidden;}
 .image-url-link {
     display: inline-block;
     margin-top: 15px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
-    color: white !important;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff !important;
     text-decoration: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 700;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 800;
     transition: all 0.3s ease;
     text-align: center;
     width: 100%;
-    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 .image-url-link:hover {
-    background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(25, 118, 210, 0.4);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.6);
 }
 
 .no-image-box {
-    padding: 30px;
-    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
-    border: 3px dashed #FF9800;
-    border-radius: 12px;
-    color: #E65100;
-    font-weight: 700;
+    padding: 35px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 3px dashed rgba(239, 68, 68, 0.5);
+    border-radius: 16px;
+    color: #ffffff;
+    font-weight: 800;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 /* ================ CARDS ================ */
@@ -322,11 +376,11 @@ header {visibility: hidden;}
 }
 
 .info-card {
-    background: #FFFFFF;
-    border-radius: 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 24px;
     padding: 40px 30px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.4);
     transition: all 0.4s ease;
     animation: fadeInUp 0.8s ease-out both;
 }
@@ -336,223 +390,224 @@ header {visibility: hidden;}
 .info-card:nth-child(3) { animation-delay: 0.5s; }
 
 .info-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 40px rgba(25, 118, 210, 0.15);
-    border-color: #1976D2;
+    transform: translateY(-10px);
+    box-shadow: 0 25px 60px rgba(59, 130, 246, 0.5);
+    border-color: #3b82f6;
 }
 
 .info-card .icon {
     font-size: 3.5rem;
     margin-bottom: 20px;
     display: block;
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4));
 }
 
 .info-card h3 {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.5rem;
-    color: #0D1B2A;
+    font-size: 1.6rem;
+    color: #ffffff;
     margin-bottom: 15px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .info-card p {
-    color: #4A5568;
+    color: #e0f2fe;
     line-height: 1.8;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 400;
 }
 
 /* ================ SECTION TITLES ================ */
 .section-title {
     font-family: 'Poppins', sans-serif;
-    font-size: 2rem;
-    color: #0D1B2A;
-    margin-bottom: 10px;
-    font-weight: 700;
+    font-size: 2.2rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 900;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
 }
 
 .section-subtitle {
-    color: #4A5568;
+    color: #e0f2fe;
     margin-bottom: 30px;
-    font-size: 1.05rem;
-    font-weight: 400;
-}
-
-.about-title {
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #0D1B2A;
-    margin-bottom: 50px;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
+    font-size: 1.15rem;
+    font-weight: 500;
 }
 
 /* ================ FILE UPLOADER ================ */
 [data-testid="stFileUploader"] {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 30px;
-    border: 3px dashed #1976D2;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 20px;
+    padding: 35px;
+    border: 3px dashed rgba(59, 130, 246, 0.6);
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: #0D47A1;
-    background: #F5FAFF;
-    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.12);
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+}
+
+[data-testid="stFileUploader"] label {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
 }
 
 /* ================ SLIDERS ================ */
 .stSlider {
-    padding: 15px 0;
+    padding: 20px 0;
 }
 
 .stSlider > label {
-    color: #0D1B2A !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    margin-bottom: 8px !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.05rem !important;
+    margin-bottom: 10px !important;
 }
 
 /* ================ BUTTONS ================ */
 .stButton > button {
-    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
-    color: #FFFFFF;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
     border: none;
-    border-radius: 12px;
-    padding: 16px 32px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.3);
+    border-radius: 16px;
+    padding: 18px 36px;
+    font-weight: 800;
+    font-size: 1.15rem;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
     transition: all 0.3s ease;
     width: 100%;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .stButton > button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(25, 118, 210, 0.4);
-    background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
 .stDownloadButton > button {
-    background: linear-gradient(135deg, #00796B 0%, #004D40 100%);
-    color: #FFFFFF;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
     border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(0, 121, 107, 0.25);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     transition: all 0.3s ease;
 }
 
 .stDownloadButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 121, 107, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.6);
 }
 
 /* ================ METRIC BOXES ================ */
 .metric-box {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 25px 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 20px;
+    padding: 30px 25px;
     margin-bottom: 20px;
-    border: 3px solid #1976D2;
-    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.15);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
     text-align: center;
     transition: all 0.3s ease;
 }
 
 .metric-box:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 28px rgba(25, 118, 210, 0.25);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
 }
 
 .metric-value {
     font-family: 'Poppins', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #0D1B2A;
-    margin-bottom: 8px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
 }
 
 .metric-label {
-    color: #4A5568;
-    font-size: 0.95rem;
-    font-weight: 600;
+    color: #e0f2fe;
+    font-size: 1rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 /* ================ DETECTION STATUS BADGE ================ */
 .detection-status {
     display: inline-block;
-    padding: 12px 30px;
+    padding: 16px 40px;
     border-radius: 50px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    margin: 20px 0;
+    font-weight: 900;
+    font-size: 1.4rem;
+    margin: 25px 0;
     text-align: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-/* ================ RESULT CARD WITH ENHANCED STYLING ================ */
+/* ================ RESULT CARD ================ */
 .result-card {
-    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    border: 3px solid #1976D2;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+    border: 2px solid rgba(59, 130, 246, 0.5);
     transition: all 0.3s ease;
     animation: fadeInUp 0.6s ease-out;
 }
 
 .result-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(25, 118, 210, 0.2);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(59, 130, 246, 0.5);
 }
 
 /* ================ TABS STYLING ================ */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-    background: #FFFFFF;
-    padding: 10px;
-    border-radius: 12px;
-    border: 2px solid #E0E0E0;
+    gap: 10px;
+    background: rgba(30, 41, 59, 0.6);
+    padding: 15px;
+    border-radius: 16px;
+    border: 2px solid rgba(59, 130, 246, 0.4);
 }
 
 .stTabs [data-baseweb="tab"] {
-    background: #F8F9FA;
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-weight: 700;
-    color: #0D1B2A;
+    background: rgba(51, 65, 85, 0.6);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 800;
+    color: #e0f2fe;
     border: 2px solid transparent;
     transition: all 0.3s ease;
 }
 
 .stTabs [data-baseweb="tab"]:hover {
-    background: #E3F2FD;
-    border-color: #1976D2;
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%) !important;
-    color: #FFFFFF !important;
-    border-color: #0D47A1 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
-/* ================ TAB CONTENT BOXES ================ */
+/* ================ TAB CONTENT ================ */
 .tab-content-box {
-    background: #FFFFFF;
-    padding: 30px;
-    border-radius: 16px;
-    border: 3px solid #1976D2;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    padding: 35px;
+    border-radius: 20px;
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.3);
+    margin-top: 25px;
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -562,125 +617,177 @@ header {visibility: hidden;}
 }
 
 .analysis-summary {
-    color: #0D1B2A;
+    color: #ffffff;
     line-height: 2;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 500;
 }
 
 .analysis-summary h3 {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #0D1B2A;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 3px solid #1976D2;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid rgba(59, 130, 246, 0.5);
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
 }
 
 .analysis-summary strong {
-    color: #1976D2;
-    font-weight: 700;
+    color: #60a5fa;
+    font-weight: 800;
 }
 
 /* ================ STATS BANNER ================ */
 .stats-banner {
-    background: #FFFFFF;
-    border-radius: 20px;
-    padding: 40px 20px;
-    margin: 40px 0;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 24px;
+    padding: 50px 30px;
+    margin: 50px 0;
     text-align: center;
-    border: 3px solid #1976D2;
-    box-shadow: 0 8px 32px rgba(25, 118, 210, 0.15);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
 }
 
 .stats-banner .stat {
     display: inline-block;
-    margin: 0 40px;
+    margin: 0 50px;
 }
 
 .stats-banner .stat-number {
     font-family: 'Poppins', sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    color: #0D1B2A;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
 }
 
 .stats-banner .stat-label {
-    color: #4A5568;
-    font-size: 1rem;
-    font-weight: 600;
+    color: #e0f2fe;
+    font-size: 1.1rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 8px;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
 }
 
 /* ================ DATABASE SECTION ================ */
 .database-section {
-    background: #FFFFFF;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-radius: 24px;
-    padding: 40px;
-    margin: 40px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 2px solid #E0E0E0;
+    padding: 45px;
+    margin: 50px 0;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+}
+
+.database-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 24px;
+    padding: 45px;
+    margin: 50px 0;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
+    border: 2px solid rgba(59, 130, 246, 0.5);
+}
+
+.database-header h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+}
+
+.database-header p {
+    color: #e0f2fe;
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .db-stats {
     display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
+    gap: 25px;
+    margin-bottom: 35px;
     flex-wrap: wrap;
 }
 
 .db-stat-box {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 20px;
-    border: 3px solid #1976D2;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 20px;
+    padding: 25px;
+    border: 2px solid rgba(59, 130, 246, 0.5);
     flex: 1;
     min-width: 200px;
     text-align: center;
-    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.db-stat-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
 }
 
 .db-stat-value {
     font-family: 'Poppins', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #0D1B2A;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
 }
 
 .db-stat-label {
-    color: #4A5568;
-    font-size: 0.9rem;
-    font-weight: 600;
+    color: #e0f2fe;
+    font-size: 1rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 8px;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
 }
 
 /* ================ FOOTER ================ */
 .footer {
     text-align: center;
-    padding: 40px 20px;
-    margin-top: 60px;
-    border-top: 3px solid #1976D2;
-    color: #4A5568;
-    font-size: 1.1rem;
+    padding: 50px 20px;
+    margin-top: 70px;
+    border-top: 3px solid rgba(59, 130, 246, 0.5);
+    color: #e0f2fe;
+    font-size: 1.15rem;
     font-weight: 500;
 }
 
 .footer strong {
-    color: #0D1B2A;
-    font-weight: 700;
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* ================ STREAMLIT COMPONENTS OVERRIDES ================ */
+.stDataFrame {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(59, 130, 246, 0.5) !important;
+}
+
+.stSelectbox > div > div {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(59, 130, 246, 0.5) !important;
+    border-radius: 12px !important;
+}
+
+.stSelectbox label {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
 }
 
 /* ================ RESPONSIVE ================ */
 @media (max-width: 768px) {
     .hero-section h1 { font-size: 2.5rem; }
     .hero-section .subtitle { font-size: 1.1rem; }
-    .about-title { font-size: 2rem; }
+    .section-title { font-size: 1.8rem; }
     .cards-container { grid-template-columns: 1fr; }
     .gallery-image-container { grid-template-columns: 1fr; }
     .stats-banner .stat { display: block; margin: 20px 0; }
@@ -810,15 +917,15 @@ def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confiden
         return False
 
 
-# ======================== NEW: IMAGE GALLERY FUNCTION ======================
+# ======================== IMAGE GALLERY FUNCTION ======================
 def display_detection_image_gallery():
     """
-    Display a gallery of stored detection images from Supabase with filter dropdown
+    Display a gallery of stored detection images from Supabase with DATE FILTER ONLY
     """
     st.markdown("""
     <div class="gallery-header">
-        <h2 class="section-title">🖼️ Detection Image Gallery</h2>
-        <p class="section-subtitle">View all stored detection images from the cloud database</p>
+        <h2>🖼️ Detection Image Gallery</h2>
+        <p>View all stored detection images from the cloud database</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -828,7 +935,6 @@ def display_detection_image_gallery():
             return
         
         with st.spinner("Loading images from database..."):
-            # Fetch all detections
             data = fetch_all_detections("oil_detections")
         
         if not data or len(data) == 0:
@@ -845,88 +951,36 @@ def display_detection_image_gallery():
         
         if not detections_with_images:
             st.warning(f"⚠️ Found {len(data)} detection records, but no images are stored.")
-            
-            # Show troubleshooting info
-            with st.expander("🔧 Troubleshooting - Why are images not uploading?"):
-                st.markdown("""
-                ### Possible Issues:
-                
-                **1. Storage Bucket Not Configured:**
-                - Go to your Supabase dashboard at https://app.supabase.com
-                - Navigate to **Storage** in the left sidebar
-                - Create a new bucket named: `detection-images`
-                - Make it **public** (Settings → Make bucket public)
-                
-                **2. Storage Policies Missing:**
-                Run this SQL in your Supabase SQL Editor:
-                ```sql
-                -- Allow public uploads
-                CREATE POLICY "Allow public uploads" ON storage.objects
-                FOR INSERT TO public
-                WITH CHECK (bucket_id = 'detection-images');
-                
-                -- Allow public reads
-                CREATE POLICY "Allow public reads" ON storage.objects
-                FOR SELECT TO public
-                USING (bucket_id = 'detection-images');
-                ```
-                
-                **3. Check Your API Key:**
-                - Ensure your SUPABASE_KEY has storage permissions
-                - Use the `service_role` key for full access (only for development)
-                
-                **4. Test Storage Connection:**
-                Run `python utils/db.py` in your terminal to test the connection.
-                """)
             return
         
         st.markdown(f'<div class="gallery-success-message">✅ Found {len(detections_with_images)} detections with images</div>', unsafe_allow_html=True)
         
-        # CREATE FILTER DROPDOWN
-        st.markdown("### 🔍 Filter Gallery")
+        # DATE FILTER ONLY
+        st.markdown('<div class="filter-section">', unsafe_allow_html=True)
+        st.markdown('<h3>📅 Filter by Date</h3>', unsafe_allow_html=True)
         
-        # Prepare filter options
-        filter_options = ["All Detections"]
-        
-        # Add date-based filters
+        # Extract unique dates
         dates = sorted(set([d.get('timestamp', '')[:10] for d in detections_with_images if d.get('timestamp')]), reverse=True)
-        for date in dates:
-            filter_options.append(f"Date: {date}")
         
-        # Add status filters
-        filter_options.append("Status: Spill Detected")
-        filter_options.append("Status: Clean")
-        
-        # Add filename filters
-        filenames = sorted(set([d.get('filename', 'Unknown') for d in detections_with_images]))
-        for filename in filenames[:10]:  # Limit to first 10 filenames
-            filter_options.append(f"File: {filename}")
+        # Create filter options - DATE ONLY
+        filter_options = ["All Dates"] + dates
         
         selected_filter = st.selectbox(
-            "Select filter to view specific detections:",
+            "Select a date to view detections:",
             options=filter_options,
             index=0
         )
         
-        # Apply filter
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Apply date filter
         filtered_detections = detections_with_images
         
-        if selected_filter.startswith("Date: "):
-            filter_date = selected_filter.replace("Date: ", "")
-            filtered_detections = [d for d in detections_with_images if d.get('timestamp', '').startswith(filter_date)]
-        
-        elif selected_filter == "Status: Spill Detected":
-            filtered_detections = [d for d in detections_with_images if d.get('has_spill')]
-        
-        elif selected_filter == "Status: Clean":
-            filtered_detections = [d for d in detections_with_images if not d.get('has_spill')]
-        
-        elif selected_filter.startswith("File: "):
-            filter_filename = selected_filter.replace("File: ", "")
-            filtered_detections = [d for d in detections_with_images if d.get('filename') == filter_filename]
+        if selected_filter != "All Dates":
+            filtered_detections = [d for d in detections_with_images if d.get('timestamp', '').startswith(selected_filter)]
         
         if not filtered_detections:
-            st.warning(f"No detections found matching filter: {selected_filter}")
+            st.warning(f"No detections found for date: {selected_filter}")
             return
         
         st.info(f"📊 Showing {len(filtered_detections)} of {len(detections_with_images)} detections")
@@ -1000,7 +1054,6 @@ def display_detection_image_gallery():
                 else:
                     st.markdown('<div class="no-image-box">⚠️ Binary mask image not available</div>', unsafe_allow_html=True)
             
-            # Add spacing between cards
             st.markdown('<div style="margin: 30px 0;"></div>', unsafe_allow_html=True)
     
     except Exception as e:
@@ -1023,8 +1076,8 @@ def main():
     # ==================== HERO SECTION ====================
     st.markdown("""
     <div class="hero-section">
-        <span class="emoji-icon">🌊🌊</span>
-        <h1>HydroVexel - an AI-Powered Oil Spill Detection System</h1>
+        <span class="emoji-icon">🌊🛰️</span>
+        <h1>HydroVexel - AI Oil Spill Detection</h1>
         <p class="subtitle">
             Our system leverages cutting-edge Deep Learning and AI technologies to detect and analyze oil spills from satellite and aerial imagery with high speed and accuracy. Designed for environmental monitoring agencies, researchers, and response teams, it transforms raw imagery into actionable insights, helping protect marine ecosystems and coastal communities.
         </p>
@@ -1033,8 +1086,6 @@ def main():
     """, unsafe_allow_html=True)
 
     # ==================== ABOUT SECTION ====================
-    st.markdown('<h2 class="about-title">Understanding Oil Spill Detection</h2>', unsafe_allow_html=True)
-    
     st.markdown("""
     <div class="cards-container">
         <div class="info-card">
@@ -1174,7 +1225,7 @@ def main():
                     <div class="detection-status status-detected">
                         🚨 OIL SPILL DETECTED
                     </div>
-                    <p style="font-size: 1.2rem; color: #0D1B2A; font-weight: 600; margin-top: 15px;">
+                    <p style="font-size: 1.4rem; color: #ffffff; font-weight: 700; margin-top: 15px;">
                         Coverage: {results['metrics']['coverage_percentage']:.2f}%
                     </p>
                 </div>
@@ -1185,7 +1236,7 @@ def main():
                     <div class="detection-status status-clean">
                         ✅ NO OIL SPILL DETECTED
                     </div>
-                    <p style="font-size: 1.2rem; color: #0D1B2A; font-weight: 600; margin-top: 15px;">
+                    <p style="font-size: 1.4rem; color: #ffffff; font-weight: 700; margin-top: 15px;">
                         Area is clean
                     </p>
                 </div>
@@ -1197,7 +1248,7 @@ def main():
             # Column 1: Detection Overlay
             with col1:
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Detection Overlay</h3>', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Detection Overlay</h3>', unsafe_allow_html=True)
                 st.image(overlay, use_column_width=True, channels="RGB")
                 st.download_button(
                     "📥 Download Overlay",
@@ -1211,7 +1262,7 @@ def main():
             # Column 2: Confidence Heatmap
             with col2:
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Confidence Heatmap</h3>', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Confidence Heatmap</h3>', unsafe_allow_html=True)
                 st.image(heatmap, use_column_width=True, channels="RGB")
                 st.download_button(
                     "📥 Download Heatmap",
@@ -1225,7 +1276,7 @@ def main():
             # Column 3: Metrics
             with col3:
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Detection Metrics</h3>', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Detection Metrics</h3>', unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
@@ -1294,18 +1345,18 @@ def main():
                 **Detection Result:** {'✅ Oil Spill Detected' if results['metrics']['has_spill'] else '❌ No Oil Spill Detected'}
                 
                 **Coverage Analysis:**
-                - Total area analyzed: {results['metrics']['total_pixels']:,} pixels
-                - Contaminated area: {results['metrics']['detected_pixels']:,} pixels
-                - Coverage percentage: {results['metrics']['coverage_percentage']:.2f}%
+                - Total area analyzed: <strong>{results['metrics']['total_pixels']:,} pixels</strong>
+                - Contaminated area: <strong>{results['metrics']['detected_pixels']:,} pixels</strong>
+                - Coverage percentage: <strong>{results['metrics']['coverage_percentage']:.2f}%</strong>
                 
                 **Confidence Metrics:**
-                - Average confidence: {results['metrics']['avg_confidence']:.1%}
-                - Maximum confidence: {results['metrics']['max_confidence']:.1%}
-                - Detection threshold: {confidence_threshold:.1%}
+                - Average confidence: <strong>{results['metrics']['avg_confidence']:.1%}</strong>
+                - Maximum confidence: <strong>{results['metrics']['max_confidence']:.1%}</strong>
+                - Detection threshold: <strong>{confidence_threshold:.1%}</strong>
                 
                 **Recommendations:**
-                {('- Immediate response required for cleanup operations' if results['metrics']['coverage_percentage'] > 5 else '- Monitor the area for potential expansion') if results['metrics']['has_spill'] else '- Continue routine monitoring'}
-                """)
+                {('<strong>- Immediate response required for cleanup operations</strong>' if results['metrics']['coverage_percentage'] > 5 else '<strong>- Monitor the area for potential expansion</strong>') if results['metrics']['has_spill'] else '<strong>- Continue routine monitoring</strong>'}
+                """, unsafe_allow_html=True)
                 
                 st.markdown('</div></div>', unsafe_allow_html=True)
 
@@ -1326,7 +1377,6 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-
     # ==================== LIVE DATABASE SECTION ====================
     if st.session_state.detection_records:
         
