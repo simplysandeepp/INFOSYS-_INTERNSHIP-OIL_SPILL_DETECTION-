@@ -330,7 +330,7 @@ def main():
         <h1>HydroVexel⚡️</h1>
         <h4>AI-Powered Oil Spill Detection System 🤖 </h4>
                 <br>
-        <p style="font-family:Poppins,sans-serif;font-style:italic;font-weight:300;font-size:1.2rem;color:#ffffff;"> <b>AI</b> Eyes Safeguarding Our <b>Precious Oceans</b>✨️</p>
+        <p style="font-family:Poppins,sans-serif;font-style:italic;font-weight:300;font-size:1.2rem;color:#ffffff;"> <b> ~ AI</b> Eyes Safeguarding Our <b>Precious Oceans</b>✨️</p>
         <p class="subtitle">
             Our system leverages cutting-edge Deep Learning and AI technologies to detect and analyze oil spills from satellite and aerial imagery with high speed and accuracy. Designed for environmental monitoring agencies, researchers, and response teams, it transforms raw imagery into actionable insights, helping protect marine ecosystems and coastal communities.
         </p>
