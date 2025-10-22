@@ -1021,8 +1021,12 @@ def main():
         results = process_image(detector, uploaded_file)
 
         if results is None:
-            st.error("❌ Detection failed. Please check your image or model configuration.")
-        return
+            st.warning("⚠️ Image could not be processed. Please upload a valid satellite or aerial image.")
+        else:
+            # Update session stats
+            st.session_state.total_processed += 1
+            if results['metrics']['has_spill']:
+                st.session_state.total_detections += 1
     
         if results is not None:
             # Update session stats
