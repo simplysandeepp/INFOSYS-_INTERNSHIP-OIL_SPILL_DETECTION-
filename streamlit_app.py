@@ -1016,6 +1016,7 @@ def main():
     cfg.OVERLAY_ALPHA = overlay_alpha
 
     # ==================== RESULTS SECTION ====================
+    # ==================== RESULTS SECTION ====================
     if uploaded_file is not None and detect_button:
         detector = load_model()
         results = process_image(detector, uploaded_file)
@@ -1036,19 +1037,6 @@ def main():
                 detected_pixels=results['metrics']['detected_pixels']
             )
 
-            # Save to Supabase database
-            save_to_supabase_with_images(
-                filename=uploaded_file.name,
-                has_spill=results['metrics']['has_spill'],
-                coverage_pct=results['metrics']['coverage_percentage'],
-                avg_confidence=results['metrics']['avg_confidence'],
-                max_confidence=results['metrics']['max_confidence'],
-                detected_pixels=results['metrics']['detected_pixels'],
-                overlay_img=overlay,
-                heatmap_img=heatmap,
-                binary_mask_img=binary_mask
-            )
-
             # Ensure all images are uint8 for proper color display
             original_img = ensure_uint8(results['original_image'])
             binary_mask = ensure_uint8(results['binary_mask'])
@@ -1063,6 +1051,37 @@ def main():
             
             heatmap = create_confidence_heatmap(results['confidence_map'], original_img)
             heatmap = ensure_uint8(heatmap)
+
+            # IMPORTANT: Convert to PIL Images for storage upload
+            overlay_pil = Image.fromarray(overlay)
+            heatmap_pil = Image.fromarray(heatmap)
+            binary_mask_pil = Image.fromarray(binary_mask)
+
+            # Save to Supabase database with images
+            # Only save if images were successfully created
+            if overlay is not None and heatmap is not None and binary_mask is not None:
+                save_to_supabase_with_images(
+                    filename=uploaded_file.name,
+                    has_spill=bool(results['metrics']['has_spill']),
+                    coverage_pct=float(results['metrics']['coverage_percentage']),
+                    avg_confidence=float(results['metrics']['avg_confidence']),
+                    max_confidence=float(results['metrics']['max_confidence']),
+                    detected_pixels=int(results['metrics']['detected_pixels']),
+                    overlay_img=overlay_pil,
+                    heatmap_img=heatmap_pil,
+                    binary_mask_img=binary_mask_pil
+                )
+            else:
+                # Fallback: save without images if creation failed
+                print("⚠️ Image creation failed, saving metadata only")
+                save_to_supabase(
+                    filename=uploaded_file.name,
+                    has_spill=bool(results['metrics']['has_spill']),
+                    coverage_pct=float(results['metrics']['coverage_percentage']),
+                    avg_confidence=float(results['metrics']['avg_confidence']),
+                    max_confidence=float(results['metrics']['max_confidence']),
+                    detected_pixels=int(results['metrics']['detected_pixels'])
+                )
 
             # IMPROVED: Detection status with high-contrast badge
             if results['metrics']['has_spill']:
@@ -1104,10 +1123,9 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 st.image(overlay, use_column_width=True, channels="RGB")
-                ov_pil = Image.fromarray(overlay)
                 st.download_button(
                     "📥 Download Overlay",
-                    data=image_to_bytes(ov_pil),
+                    data=image_to_bytes(overlay_pil),
                     file_name='oil_spill_overlay.png',
                     mime='image/png',
                     use_container_width=True
@@ -1123,10 +1141,9 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 st.image(heatmap, use_column_width=True, channels="RGB")
-                hm_pil = Image.fromarray(heatmap)
                 st.download_button(
                     "📥 Download Heatmap",
-                    data=image_to_bytes(hm_pil),
+                    data=image_to_bytes(heatmap_pil),
                     file_name='oil_spill_heatmap.png',
                     mime='image/png',
                     use_container_width=True
