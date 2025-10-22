@@ -1016,11 +1016,14 @@ def main():
     cfg.OVERLAY_ALPHA = overlay_alpha
 
     # ==================== RESULTS SECTION ====================
-    # ==================== RESULTS SECTION ====================
     if uploaded_file is not None and detect_button:
         detector = load_model()
         results = process_image(detector, uploaded_file)
 
+        if results is None:
+            st.error("❌ Detection failed. Please check your image or model configuration.")
+        return
+    
         if results is not None:
             # Update session stats
             st.session_state.total_processed += 1
