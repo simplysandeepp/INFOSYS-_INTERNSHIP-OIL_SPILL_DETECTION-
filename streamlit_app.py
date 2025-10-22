@@ -12,6 +12,7 @@ import base64
 import pandas as pd
 from datetime import datetime
 import json
+import base64
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -748,6 +749,177 @@ def save_to_supabase(filename, has_spill, coverage_pct, avg_confidence, max_conf
         st.warning(f"⚠️ Could not save to database: {str(e)}")
         return False
 
+# ============================================================================
+# OPTION 1: SAVE IMAGES TO SUPABASE STORAGE (RECOMMENDED)
+# ============================================================================
+
+def save_images_to_storage(filename, overlay_img, heatmap_img, binary_mask_img, detected_pixels):
+    """
+    Save detection images to Supabase Storage (file-based storage)
+    
+    Args:
+        filename (str): Original uploaded filename
+        overlay_img (PIL.Image or np.ndarray): Detection overlay image
+        heatmap_img (PIL.Image or np.ndarray): Confidence heatmap image
+        binary_mask_img (PIL.Image or np.ndarray): Binary mask image
+        detected_pixels (int): For folder organization
+    
+    Returns:
+        dict: URLs of saved images
+    """
+    if supabase is None:
+        print("⚠️ Supabase client not initialized")
+        return None
+    
+    try:
+        # Create timestamp for unique folder
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        base_name = filename.split('.')[0]
+        folder = f"detections/{timestamp}_{base_name}"
+        
+        images_data = {
+            'overlay': overlay_img,
+            'heatmap': heatmap_img,
+            'binary_mask': binary_mask_img
+        }
+        
+        urls = {}
+        
+        for img_type, img_array in images_data.items():
+            # Convert to PIL Image if numpy array
+            if not isinstance(img_array, Image.Image):
+                img_array = Image.fromarray(img_array)
+            
+            # Convert to bytes
+            img_bytes = io.BytesIO()
+            img_array.save(img_bytes, format='PNG')
+            img_bytes.seek(0)
+            
+            # Define file path in storage
+            file_path = f"{folder}/{img_type}.png"
+            
+            # Upload to Supabase Storage bucket 'detection-images'
+            response = supabase.storage.from_('detection-images').upload(
+                file_path,
+                img_bytes.getvalue(),
+                {"cacheControl": "3600", "upsert": "false"}
+            )
+            
+            # Get public URL
+            public_url = supabase.storage.from_('detection-images').get_public_url(file_path)
+            urls[img_type] = public_url
+            
+            print(f"✅ Uploaded {img_type}: {public_url}")
+        
+        return urls
+    
+    except Exception as e:
+        print(f"❌ Error uploading images to storage: {str(e)}")
+        return None
+
+
+# ============================================================================
+# OPTION 2: SAVE IMAGES AS BASE64 IN DATABASE
+# ============================================================================
+
+def image_to_base64(img_array):
+    """Convert image array to base64 string"""
+    if not isinstance(img_array, Image.Image):
+        img_array = Image.fromarray(img_array)
+    
+    buffer = io.BytesIO()
+    img_array.save(buffer, format="PNG")
+    buffer.seek(0)
+    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+    return img_base64
+
+
+def save_detection_with_images_base64(filename, has_spill, coverage_pct, avg_confidence, 
+                                       max_confidence, detected_pixels, overlay_img, 
+                                       heatmap_img, binary_mask_img):
+    """
+    Save detection data WITH images as base64 strings in database
+    
+    Note: Only use this for small images or testing. For production, use storage option.
+    """
+    try:
+        if supabase is None:
+            print("⚠️ Supabase client not initialized")
+            return False
+        
+        # Convert images to base64
+        overlay_b64 = image_to_base64(overlay_img)
+        heatmap_b64 = image_to_base64(heatmap_img)
+        binary_b64 = image_to_base64(binary_mask_img)
+        
+        data = {
+            'timestamp': datetime.now().isoformat(),
+            'filename': str(filename),
+            'has_spill': bool(has_spill),
+            'coverage_percentage': float(coverage_pct),
+            'avg_confidence': float(avg_confidence),
+            'max_confidence': float(max_confidence),
+            'detected_pixels': int(detected_pixels),
+            'overlay_image': overlay_b64,        # Base64 encoded PNG
+            'heatmap_image': heatmap_b64,        # Base64 encoded PNG
+            'binary_mask_image': binary_b64      # Base64 encoded PNG
+        }
+        
+        response = insert_detection_data(data, table_name="oil_detections_with_images")
+        print(f"✅ Detection with images saved successfully")
+        return True
+    
+    except Exception as e:
+        print(f"❌ Error saving detection with images: {str(e)}")
+        return False
+
+
+# ============================================================================
+# UPDATED: COMPLETE SAVE FUNCTION (STORAGE METHOD - RECOMMENDED)
+# ============================================================================
+
+def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confidence, 
+                                  max_confidence, detected_pixels, overlay_img, 
+                                  heatmap_img, binary_mask_img):
+    """
+    Complete save function: metadata to database + images to storage
+    """
+    try:
+        if supabase is None:
+            print("⚠️ Supabase client not initialized")
+            return False
+        
+        # First, upload images to storage and get URLs
+        image_urls = save_images_to_storage(
+            filename, overlay_img, heatmap_img, binary_mask_img, detected_pixels
+        )
+        
+        if image_urls is None:
+            print("⚠️ Image upload failed, but saving metadata anyway")
+            image_urls = {}
+        
+        # Save metadata + image URLs to database
+        data = {
+            'timestamp': datetime.now().isoformat(),
+            'filename': str(filename),
+            'has_spill': bool(has_spill),
+            'coverage_percentage': float(coverage_pct),
+            'avg_confidence': float(avg_confidence),
+            'max_confidence': float(max_confidence),
+            'detected_pixels': int(detected_pixels),
+            'overlay_url': image_urls.get('overlay', ''),
+            'heatmap_url': image_urls.get('heatmap', ''),
+            'binary_mask_url': image_urls.get('binary_mask', '')
+        }
+        
+        response = insert_detection_data(data, table_name="oil_detections")
+        print(f"✅ Detection data and images saved successfully")
+        return True
+    
+    except Exception as e:
+        print(f"❌ Error in save_to_supabase_with_images: {str(e)}")
+        return False
+
 # ------------------------ MAIN UI -----------------------------------------
 def main():
     # Initialize database
@@ -865,13 +1037,16 @@ def main():
             )
 
             # Save to Supabase database
-            save_to_supabase(
+            save_to_supabase_with_images(
                 filename=uploaded_file.name,
                 has_spill=results['metrics']['has_spill'],
                 coverage_pct=results['metrics']['coverage_percentage'],
                 avg_confidence=results['metrics']['avg_confidence'],
                 max_confidence=results['metrics']['max_confidence'],
-                detected_pixels=results['metrics']['detected_pixels']
+                detected_pixels=results['metrics']['detected_pixels'],
+                overlay_img=overlay,
+                heatmap_img=heatmap,
+                binary_mask_img=binary_mask
             )
 
             # Ensure all images are uint8 for proper color display
