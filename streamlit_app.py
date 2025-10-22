@@ -1,5 +1,5 @@
 # ============================================================================
-# STREAMLIT_APP.PY - Streamlit Web Application (Revamped UI Version)
+# STREAMLIT_APP.PY - Complete Fixed Version with Image Gallery
 # ============================================================================
 
 import streamlit as st
@@ -12,7 +12,6 @@ import base64
 import pandas as pd
 from datetime import datetime
 import json
-import base64
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -24,7 +23,8 @@ from utils.preprocessing import validate_image
 import config.config as cfg
 
 # Import database functions
-from utils.db import insert_detection_data, fetch_all_detections, supabase
+from utils.db import (insert_detection_data, fetch_all_detections, supabase, 
+                     save_images_to_storage, fetch_detection_with_images)
 
 # ------------------------ PAGE CONFIG --------------------------------------
 st.set_page_config(
@@ -35,7 +35,6 @@ st.set_page_config(
 )
 
 # ------------------------ PREMIUM REVAMPED STYLES ----------------------
-# MAJOR IMPROVEMENTS: High contrast, clean readability, professional design
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -53,7 +52,6 @@ html, body, [class*="css"] {
     color: #1E1E1E;
 }
 
-/* Main container - LIGHT BACKGROUND for high contrast */
 .stApp {
     background: linear-gradient(135deg, #F0F4FF 0%, #E3F2FD 50%, #EFF6FF 100%);
     background-attachment: fixed;
@@ -65,12 +63,11 @@ html, body, [class*="css"] {
     max-width: 1400px !important;
 }
 
-/* Hide Streamlit branding */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* ================ HERO SECTION - HIGH CONTRAST ================ */
+/* ================ HERO SECTION ================ */
 .hero-section {
     background: #FFFFFF;
     border-radius: 24px;
@@ -84,14 +81,8 @@ header {visibility: hidden;}
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .hero-section h1 {
@@ -133,21 +124,142 @@ header {visibility: hidden;}
     border: 2px solid #1976D2;
 }
 
-/* ================ ABOUT SECTION - CLEAN CARDS ================ */
-.about-section {
-    margin: 50px 0;
+/* ================ IMAGE GALLERY STYLES ================ */
+.gallery-header {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 40px 0 20px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 2px solid #E0E0E0;
 }
 
-.about-title {
-    text-align: center;
+.image-gallery-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 2px solid #E0E0E0;
+    transition: all 0.3s ease;
+}
+
+.image-gallery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(25, 118, 210, 0.15);
+    border-color: #1976D2;
+}
+
+.gallery-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.gallery-filename {
     font-family: 'Poppins', sans-serif;
-    font-size: 2.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #0D1B2A;
-    margin-bottom: 50px;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
+.gallery-timestamp {
+    color: #4A5568;
+    font-size: 0.95rem;
+}
+
+.gallery-status-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-detected {
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+    color: #FFFFFF;
+}
+
+.status-clean {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    color: #FFFFFF;
+}
+
+.gallery-image-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.gallery-image-box {
+    text-align: center;
+    padding: 15px;
+    background: #F8F9FA;
+    border-radius: 12px;
+    border: 2px solid #E0E0E0;
+    transition: all 0.3s ease;
+}
+
+.gallery-image-box:hover {
+    border-color: #1976D2;
+    background: #F0F7FF;
+    transform: translateY(-5px);
+}
+
+.gallery-image-box img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.gallery-image-box img:hover {
+    transform: scale(1.05);
+}
+
+.gallery-image-label {
+    font-weight: 700;
+    color: #0D1B2A;
+    margin: 12px 0 8px 0;
+    font-size: 1rem;
+}
+
+.image-url-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+    color: white !important;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.image-url-link:hover {
+    background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.no-image-box {
+    padding: 20px;
+    background: #FFF3E0;
+    border: 2px dashed #FF9800;
+    border-radius: 8px;
+    color: #E65100;
+    font-weight: 600;
+}
+
+/* ================ CARDS ================ */
 .cards-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -195,7 +307,7 @@ header {visibility: hidden;}
     font-size: 1rem;
 }
 
-/* ================ SECTION TITLES - HIGH VISIBILITY ================ */
+/* ================ SECTION TITLES ================ */
 .section-title {
     font-family: 'Poppins', sans-serif;
     font-size: 2rem;
@@ -211,7 +323,17 @@ header {visibility: hidden;}
     font-weight: 400;
 }
 
-/* ================ FILE UPLOADER - CLEAN DESIGN ================ */
+.about-title {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0D1B2A;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+/* ================ FILE UPLOADER ================ */
 [data-testid="stFileUploader"] {
     background: #FFFFFF;
     border-radius: 16px;
@@ -227,7 +349,7 @@ header {visibility: hidden;}
     box-shadow: 0 6px 20px rgba(25, 118, 210, 0.12);
 }
 
-/* ================ SLIDERS - IMPROVED LABELS ================ */
+/* ================ SLIDERS ================ */
 .stSlider {
     padding: 15px 0;
 }
@@ -239,7 +361,7 @@ header {visibility: hidden;}
     margin-bottom: 8px !important;
 }
 
-/* ================ BUTTONS - HIGH CONTRAST & PROMINENT ================ */
+/* ================ BUTTONS ================ */
 .stButton > button {
     background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
     color: #FFFFFF;
@@ -277,74 +399,7 @@ header {visibility: hidden;}
     box-shadow: 0 6px 20px rgba(0, 121, 107, 0.35);
 }
 
-/* ================ RESULTS SECTION - WHITE CARDS WITH HIGH CONTRAST ================ */
-.results-container {
-    margin: 40px 0;
-    padding: 20px;
-    background: transparent;
-    border-radius: 24px;
-}
-
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
-    margin: 30px 0;
-}
-
-.result-card {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
-}
-
-.result-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    border-color: #1976D2;
-}
-
-.result-card h3 {
-    font-family: 'Poppins', sans-serif;
-    color: #0D1B2A;
-    margin: 0 0 15px 0;
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-align: center;
-    padding-bottom: 15px;
-    border-bottom: 3px solid #1976D2;
-}
-
-.result-card img {
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    border: 2px solid #E0E0E0;
-}
-
-/* Streamlit column container fixes */
-[data-testid="column"] {
-    padding: 0 10px;
-}
-
-[data-testid="column"] > div {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
-    min-height: 100%;
-}
-
-[data-testid="column"] img {
-    border-radius: 12px;
-    margin: 10px 0;
-}
-
-/* ================ METRIC BOXES - WHITE BG, DARK TEXT, HIGH CONTRAST ================ */
+/* ================ METRIC BOXES ================ */
 .metric-box {
     background: #FFFFFF;
     border-radius: 16px;
@@ -378,101 +433,19 @@ header {visibility: hidden;}
     letter-spacing: 1px;
 }
 
-[data-testid="stFileUploader"] label,
-[data-testid="stFileUploader"] small,
-[data-testid="stFileUploader"] div {
-    color: #0D1B2A !important;
-    font-weight: 600 !important;
-    font-size: 1.05rem !important;
+/* ================ DETECTION STATUS BADGE ================ */
+.detection-status {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
-[data-testid="stFileUploader"] small {
-    font-size: 0.95rem !important;
-    color: #4A5568 !important;
-}
-
-/* ================ SUCCESS/ERROR ALERTS - HIGH CONTRAST ================ */
-.stAlert {
-    border-radius: 12px;
-    border: 2px solid;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    font-size: 1.05rem;
-    font-weight: 600;
-    padding: 16px 20px !important;
-}
-
-.stSuccess {
-    background-color: #E8F5E9 !important;
-    color: #1B5E20 !important;
-    border-color: #4CAF50 !important;
-}
-
-.stInfo {
-    background-color: #E3F2FD !important;
-    color: #0D47A1 !important;
-    border-color: #2196F3 !important;
-}
-
-.stError {
-    background-color: #FFEBEE !important;
-    color: #B71C1C !important;
-    border-color: #F44336 !important;
-}
-
-/* ================ TABS - CLEAN DESIGN ================ */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 10px;
-    background: #FFFFFF;
-    padding: 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: #4A5568;
-    border-radius: 8px;
-    padding: 12px 24px;
-    font-weight: 600;
-    border: 2px solid transparent;
-}
-
-.stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
-    color: #FFFFFF;
-    border-color: #0D47A1;
-}
-
-.stTabs [data-baseweb="tab-panel"] {
-    padding-top: 20px;
-}
-
-.stTabs [data-baseweb="tab-panel"] h3 {
-    color: #0D1B2A !important;
-    font-weight: 700 !important;
-}
-
-.stTabs [data-baseweb="tab-panel"] p,
-.stTabs [data-baseweb="tab-panel"] li,
-.stTabs [data-baseweb="tab-panel"] strong {
-    color: #0D1B2A !important;
-}
-
-.stMarkdown {
-    color: #0D1B2A;
-}
-
-.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, 
-.stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
-    color: #0D1B2A !important;
-}
-
-.stMarkdown p, .stMarkdown li, .stMarkdown strong, 
-.stMarkdown em, .stMarkdown code {
-    color: #0D1B2A !important;
-}
-
-/* ================ STATS BANNER - HIGH CONTRAST ================ */
+/* ================ STATS BANNER ================ */
 .stats-banner {
     background: #FFFFFF;
     border-radius: 20px;
@@ -505,7 +478,7 @@ header {visibility: hidden;}
     margin-top: 8px;
 }
 
-/* ================ DATABASE SECTION - CLEAN TABLE ================ */
+/* ================ DATABASE SECTION ================ */
 .database-section {
     background: #FFFFFF;
     border-radius: 24px;
@@ -513,11 +486,6 @@ header {visibility: hidden;}
     margin: 40px 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     border: 2px solid #E0E0E0;
-}
-
-.database-header h2 {
-    color: #0D1B2A;
-    margin-bottom: 30px;
 }
 
 .db-stats {
@@ -554,14 +522,7 @@ header {visibility: hidden;}
     margin-top: 8px;
 }
 
-[data-testid="stDataFrame"] {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
-}
-
-/* ================ FOOTER - CLEAR TEXT ================ */
+/* ================ FOOTER ================ */
 .footer {
     text-align: center;
     padding: 40px 20px;
@@ -577,68 +538,14 @@ header {visibility: hidden;}
     font-weight: 700;
 }
 
-/* ================ RESPONSIVE DESIGN ================ */
+/* ================ RESPONSIVE ================ */
 @media (max-width: 768px) {
-    .hero-section h1 {
-        font-size: 2.5rem;
-    }
-    
-    .hero-section .subtitle {
-        font-size: 1.1rem;
-    }
-    
-    .about-title {
-        font-size: 2rem;
-    }
-    
-    .cards-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .results-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-banner .stat {
-        display: block;
-        margin: 20px 0;
-    }
-}
-
-/* ================ LOADING SPINNER ================ */
-.stSpinner > div {
-    border-top-color: #1976D2 !important;
-    border-right-color: #1976D2 !important;
-}
-
-/* ================ IMAGE CONTAINERS - PROPER BORDERS ================ */
-.stImage {
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-/* ================ DETECTION STATUS BADGE ================ */
-.detection-status {
-    display: inline-block;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    margin: 20px 0;
-    text-align: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-}
-
-.status-detected {
-    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
-    color: #FFFFFF;
-    border: 3px solid #B71C1C;
-}
-
-.status-clean {
-    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-    color: #FFFFFF;
-    border: 3px solid #1B5E20;
+    .hero-section h1 { font-size: 2.5rem; }
+    .hero-section .subtitle { font-size: 1.1rem; }
+    .about-title { font-size: 2rem; }
+    .cards-container { grid-template-columns: 1fr; }
+    .gallery-image-container { grid-template-columns: 1fr; }
+    .stats-banner .stat { display: block; margin: 20px 0; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -719,164 +626,6 @@ def ensure_uint8(img):
             img = img.astype(np.uint8)
     return img
 
-import numpy as np
-from datetime import datetime
-
-def save_to_supabase(filename, has_spill, coverage_pct, avg_confidence, max_confidence, detected_pixels):
-    """Save detection data to Supabase database with proper type conversion"""
-    try:
-        if supabase is None:
-            print("⚠️ Supabase client not initialized - skipping database save")
-            return False
-        
-        # Convert NumPy types to native Python types
-        data = {
-            'timestamp': datetime.now().isoformat(),
-            'filename': str(filename),
-            'has_spill': bool(has_spill),  # Convert numpy.bool_ to Python bool
-            'coverage_percentage': float(coverage_pct),
-            'avg_confidence': float(avg_confidence),
-            'max_confidence': float(max_confidence),
-            'detected_pixels': int(detected_pixels)
-        }
-        
-        print(f"🔄 Attempting to save to Supabase: {data}")
-        response = insert_detection_data(data, table_name="oil_detections")
-        print(f"✅ Supabase save successful: {response}")
-        return True
-    except Exception as e:
-        print(f"❌ Error saving to Supabase: {str(e)}")
-        st.warning(f"⚠️ Could not save to database: {str(e)}")
-        return False
-
-# ============================================================================
-# OPTION 1: SAVE IMAGES TO SUPABASE STORAGE (RECOMMENDED)
-# ============================================================================
-
-def save_images_to_storage(filename, overlay_img, heatmap_img, binary_mask_img, detected_pixels):
-    """
-    Save detection images to Supabase Storage (file-based storage)
-    
-    Args:
-        filename (str): Original uploaded filename
-        overlay_img (PIL.Image or np.ndarray): Detection overlay image
-        heatmap_img (PIL.Image or np.ndarray): Confidence heatmap image
-        binary_mask_img (PIL.Image or np.ndarray): Binary mask image
-        detected_pixels (int): For folder organization
-    
-    Returns:
-        dict: URLs of saved images
-    """
-    if supabase is None:
-        print("⚠️ Supabase client not initialized")
-        return None
-    
-    try:
-        # Create timestamp for unique folder
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        base_name = filename.split('.')[0]
-        folder = f"detections/{timestamp}_{base_name}"
-        
-        images_data = {
-            'overlay': overlay_img,
-            'heatmap': heatmap_img,
-            'binary_mask': binary_mask_img
-        }
-        
-        urls = {}
-        
-        for img_type, img_array in images_data.items():
-            # Convert to PIL Image if numpy array
-            if not isinstance(img_array, Image.Image):
-                img_array = Image.fromarray(img_array)
-            
-            # Convert to bytes
-            img_bytes = io.BytesIO()
-            img_array.save(img_bytes, format='PNG')
-            img_bytes.seek(0)
-            
-            # Define file path in storage
-            file_path = f"{folder}/{img_type}.png"
-            
-            # Upload to Supabase Storage bucket 'detection-images'
-            response = supabase.storage.from_('detection-images').upload(
-                file_path,
-                img_bytes.getvalue(),
-                {"cacheControl": "3600", "upsert": "false"}
-            )
-            
-            # Get public URL
-            public_url = supabase.storage.from_('detection-images').get_public_url(file_path)
-            urls[img_type] = public_url
-            
-            print(f"✅ Uploaded {img_type}: {public_url}")
-        
-        return urls
-    
-    except Exception as e:
-        print(f"❌ Error uploading images to storage: {str(e)}")
-        return None
-
-
-# ============================================================================
-# OPTION 2: SAVE IMAGES AS BASE64 IN DATABASE
-# ============================================================================
-
-def image_to_base64(img_array):
-    """Convert image array to base64 string"""
-    if not isinstance(img_array, Image.Image):
-        img_array = Image.fromarray(img_array)
-    
-    buffer = io.BytesIO()
-    img_array.save(buffer, format="PNG")
-    buffer.seek(0)
-    img_base64 = base64.b64encode(buffer.getvalue()).decode()
-    return img_base64
-
-
-def save_detection_with_images_base64(filename, has_spill, coverage_pct, avg_confidence, 
-                                       max_confidence, detected_pixels, overlay_img, 
-                                       heatmap_img, binary_mask_img):
-    """
-    Save detection data WITH images as base64 strings in database
-    
-    Note: Only use this for small images or testing. For production, use storage option.
-    """
-    try:
-        if supabase is None:
-            print("⚠️ Supabase client not initialized")
-            return False
-        
-        # Convert images to base64
-        overlay_b64 = image_to_base64(overlay_img)
-        heatmap_b64 = image_to_base64(heatmap_img)
-        binary_b64 = image_to_base64(binary_mask_img)
-        
-        data = {
-            'timestamp': datetime.now().isoformat(),
-            'filename': str(filename),
-            'has_spill': bool(has_spill),
-            'coverage_percentage': float(coverage_pct),
-            'avg_confidence': float(avg_confidence),
-            'max_confidence': float(max_confidence),
-            'detected_pixels': int(detected_pixels),
-            'overlay_image': overlay_b64,        # Base64 encoded PNG
-            'heatmap_image': heatmap_b64,        # Base64 encoded PNG
-            'binary_mask_image': binary_b64      # Base64 encoded PNG
-        }
-        
-        response = insert_detection_data(data, table_name="oil_detections_with_images")
-        print(f"✅ Detection with images saved successfully")
-        return True
-    
-    except Exception as e:
-        print(f"❌ Error saving detection with images: {str(e)}")
-        return False
-
-
-# ============================================================================
-# UPDATED: COMPLETE SAVE FUNCTION (STORAGE METHOD - RECOMMENDED)
-# ============================================================================
 
 def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confidence, 
                                   max_confidence, detected_pixels, overlay_img, 
@@ -891,12 +640,12 @@ def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confiden
         
         # First, upload images to storage and get URLs
         image_urls = save_images_to_storage(
-            filename, overlay_img, heatmap_img, binary_mask_img, detected_pixels
+            filename, overlay_img, heatmap_img, binary_mask_img
         )
         
         if image_urls is None:
-            print("⚠️ Image upload failed, but saving metadata anyway")
-            image_urls = {}
+            print("⚠️ Image upload failed, saving metadata without URLs")
+            image_urls = {'overlay': '', 'heatmap': '', 'binary_mask': ''}
         
         # Save metadata + image URLs to database
         data = {
@@ -913,12 +662,160 @@ def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confiden
         }
         
         response = insert_detection_data(data, table_name="oil_detections")
-        print(f"✅ Detection data and images saved successfully")
+        print(f"✅ Detection data saved successfully")
         return True
     
     except Exception as e:
         print(f"❌ Error in save_to_supabase_with_images: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
+
+
+# ======================== NEW: IMAGE GALLERY FUNCTION ======================
+def display_detection_image_gallery():
+    """
+    Display a gallery of stored detection images from Supabase
+    """
+    st.markdown("""
+    <div class="gallery-header">
+        <h2 class="section-title">🖼️ Detection Image Gallery</h2>
+        <p class="section-subtitle">View all stored detection images from the cloud database</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    try:
+        if supabase is None:
+            st.info("⚠️ Supabase database not configured. Image gallery is unavailable.")
+            return
+        
+        with st.spinner("Loading images from database..."):
+            # Fetch all detections
+            data = fetch_all_detections("oil_detections")
+        
+        if not data or len(data) == 0:
+            st.info("📭 No images found in the database yet. Upload and analyze images to populate the gallery.")
+            return
+        
+        # Filter only detections that have at least one image URL
+        detections_with_images = [
+            d for d in data 
+            if (d.get('overlay_url') and d.get('overlay_url') != '') or 
+               (d.get('heatmap_url') and d.get('heatmap_url') != '') or 
+               (d.get('binary_mask_url') and d.get('binary_mask_url') != '')
+        ]
+        
+        if not detections_with_images:
+            st.warning(f"⚠️ Found {len(data)} detection records, but no images are stored.")
+            
+            # Show troubleshooting info
+            with st.expander("🔧 Troubleshooting - Why are images not uploading?"):
+                st.markdown("""
+                ### Possible Issues:
+                
+                **1. Storage Bucket Not Configured:**
+                - Go to your Supabase dashboard at https://app.supabase.com
+                - Navigate to **Storage** in the left sidebar
+                - Create a new bucket named: `detection-images`
+                - Make it **public** (Settings → Make bucket public)
+                
+                **2. Storage Policies Missing:**
+                Run this SQL in your Supabase SQL Editor:
+                ```sql
+                -- Allow public uploads
+                CREATE POLICY "Allow public uploads" ON storage.objects
+                FOR INSERT TO public
+                WITH CHECK (bucket_id = 'detection-images');
+                
+                -- Allow public reads
+                CREATE POLICY "Allow public reads" ON storage.objects
+                FOR SELECT TO public
+                USING (bucket_id = 'detection-images');
+                ```
+                
+                **3. Check Your API Key:**
+                - Ensure your SUPABASE_KEY has storage permissions
+                - Use the `service_role` key for full access (only for development)
+                
+                **4. Test Storage Connection:**
+                Run `python utils/db.py` in your terminal to test the connection.
+                """)
+            return
+        
+        st.success(f"✅ Found {len(detections_with_images)} detections with images")
+        
+        # Display each detection in a card
+        for idx, detection in enumerate(detections_with_images):
+            st.markdown(f"""
+            <div class="image-gallery-card">
+                <div class="gallery-header-info">
+                    <div>
+                        <div class="gallery-filename">📄 {detection.get('filename', 'Unknown')}</div>
+                        <div class="gallery-timestamp">🕒 {detection.get('timestamp', 'Unknown')}</div>
+                    </div>
+                    <div>
+                        <span class="gallery-status-badge {'status-detected' if detection.get('has_spill') else 'status-clean'}">
+                            {'🚨 Spill Detected' if detection.get('has_spill') else '✅ Clean'}
+                        </span>
+                    </div>
+                </div>
+                <div style="margin: 15px 0; padding: 15px; background: #F8F9FA; border-radius: 10px;">
+                    <strong>Coverage:</strong> {detection.get('coverage_percentage', 0):.2f}% | 
+                    <strong>Avg Confidence:</strong> {detection.get('avg_confidence', 0):.3f} | 
+                    <strong>Max Confidence:</strong> {detection.get('max_confidence', 0):.3f} | 
+                    <strong>Pixels:</strong> {detection.get('detected_pixels', 0):,}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Create three columns for the three image types
+            col1, col2, col3 = st.columns(3)
+            
+            # Overlay Image
+            with col1:
+                overlay_url = detection.get('overlay_url', '')
+                if overlay_url and overlay_url != '':
+                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
+                    st.image(overlay_url, caption="Detection Overlay", use_column_width=True)
+                    st.markdown(f'<div class="gallery-image-label">Detection Overlay</div>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{overlay_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="no-image-box">⚠️ Overlay image not available</div>', unsafe_allow_html=True)
+            
+            # Heatmap Image
+            with col2:
+                heatmap_url = detection.get('heatmap_url', '')
+                if heatmap_url and heatmap_url != '':
+                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
+                    st.image(heatmap_url, caption="Confidence Heatmap", use_column_width=True)
+                    st.markdown(f'<div class="gallery-image-label">Confidence Heatmap</div>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{heatmap_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="no-image-box">⚠️ Heatmap image not available</div>', unsafe_allow_html=True)
+            
+            # Binary Mask Image
+            with col3:
+                binary_url = detection.get('binary_mask_url', '')
+                if binary_url and binary_url != '':
+                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
+                    st.image(binary_url, caption="Binary Mask", use_column_width=True)
+                    st.markdown(f'<div class="gallery-image-label">Binary Mask</div>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{binary_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="no-image-box">⚠️ Binary mask image not available</div>', unsafe_allow_html=True)
+            
+            # Add spacing between cards
+            st.markdown('<div style="margin: 30px 0;"></div>', unsafe_allow_html=True)
+    
+    except Exception as e:
+        st.error(f"❌ Error loading image gallery: {str(e)}")
+        print(f"Gallery error: {e}")
+        import traceback
+        traceback.print_exc()
+
 
 # ------------------------ MAIN UI -----------------------------------------
 def main():
@@ -1027,12 +924,6 @@ def main():
             st.session_state.total_processed += 1
             if results['metrics']['has_spill']:
                 st.session_state.total_detections += 1
-    
-        if results is not None:
-            # Update session stats
-            st.session_state.total_processed += 1
-            if results['metrics']['has_spill']:
-                st.session_state.total_detections += 1
 
             # Add record to local session database
             add_detection_record(
@@ -1059,15 +950,15 @@ def main():
             heatmap = create_confidence_heatmap(results['confidence_map'], original_img)
             heatmap = ensure_uint8(heatmap)
 
-            # IMPORTANT: Convert to PIL Images for storage upload
+            # Convert to PIL Images for storage upload
             overlay_pil = Image.fromarray(overlay)
             heatmap_pil = Image.fromarray(heatmap)
             binary_mask_pil = Image.fromarray(binary_mask)
 
             # Save to Supabase database with images
-            # Only save if images were successfully created
+            save_success = False
             if overlay is not None and heatmap is not None and binary_mask is not None:
-                save_to_supabase_with_images(
+                save_success = save_to_supabase_with_images(
                     filename=uploaded_file.name,
                     has_spill=bool(results['metrics']['has_spill']),
                     coverage_pct=float(results['metrics']['coverage_percentage']),
@@ -1078,19 +969,13 @@ def main():
                     heatmap_img=heatmap_pil,
                     binary_mask_img=binary_mask_pil
                 )
-            else:
-                # Fallback: save without images if creation failed
-                print("⚠️ Image creation failed, saving metadata only")
-                save_to_supabase(
-                    filename=uploaded_file.name,
-                    has_spill=bool(results['metrics']['has_spill']),
-                    coverage_pct=float(results['metrics']['coverage_percentage']),
-                    avg_confidence=float(results['metrics']['avg_confidence']),
-                    max_confidence=float(results['metrics']['max_confidence']),
-                    detected_pixels=int(results['metrics']['detected_pixels'])
-                )
+                
+                if save_success:
+                    st.success("✅ Detection data and images saved to cloud database!")
+                else:
+                    st.warning("⚠️ Images processed but cloud upload had issues. Check logs.")
 
-            # IMPROVED: Detection status with high-contrast badge
+            # Detection status with high-contrast badge
             if results['metrics']['has_spill']:
                 st.markdown(f"""
                 <div style="text-align: center; margin: 30px 0;">
@@ -1114,10 +999,9 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
 
-            # IMPROVED: Results in properly aligned columns
+            # Results in properly aligned columns
             st.markdown('<div class="results-container">', unsafe_allow_html=True)
             
-            # Create three columns with equal spacing
             col1, col2, col3 = st.columns(3, gap="medium")
             
             # Column 1: Detection Overlay
@@ -1166,7 +1050,6 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # IMPROVED: High-contrast metric boxes with proper spacing
                 st.markdown(f"""
                 <div class="metric-box">
                     <div class="metric-value">{results['metrics']['coverage_percentage']:.2f}%</div>
@@ -1275,7 +1158,6 @@ def main():
 
     # ==================== LIVE DATABASE SECTION ====================
     if st.session_state.detection_records:
-        st.markdown('<div class="database-section">', unsafe_allow_html=True)
         
         st.markdown("""
         <div class="database-header">
@@ -1283,7 +1165,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Database stats
         df = get_records_dataframe()
         total_records = len(df)
         spills_found = len(df[df['result'].str.contains('✅')])
@@ -1306,7 +1187,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Display dataframe
         st.dataframe(
             df,
             use_container_width=True,
@@ -1322,7 +1202,6 @@ def main():
             }
         )
         
-        # Export options
         col_export1, col_export2, col_export3 = st.columns([1, 1, 2])
         with col_export1:
             csv = df.to_csv(index=False).encode('utf-8')
@@ -1359,15 +1238,17 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ==================== PREVIOUS DETECTIONS FROM SUPABASE ====================
+    # ==================== IMAGE GALLERY SECTION (NEW!) ====================
     st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="database-section">', unsafe_allow_html=True)
-    
+    display_detection_image_gallery()
+
+    # ==================== PREVIOUS DETECTIONS FROM SUPABASE ====================
+    st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)    
     st.markdown("""
     <div class="database-header">
-        <h2 class="section-title">📊 Previous Detections (Supabase Database)</h2>
+        <h2 class="section-title">📊 Previous Detections (Database Records)</h2>
         <p style="color: #4A5568; font-size: 1.05rem; margin-top: 10px;">
-            All detections stored in the cloud database across all sessions
+            All detection metadata stored in the cloud database
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1380,18 +1261,14 @@ def main():
                 data = fetch_all_detections("oil_detections")
             
             if data and len(data) > 0:
-                # Convert to DataFrame
                 df_supabase = pd.DataFrame(data)
                 
-                # Format the dataframe for better display
                 if 'timestamp' in df_supabase.columns:
                     df_supabase['timestamp'] = pd.to_datetime(df_supabase['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
                 
-                # Add result column based on has_spill
                 if 'has_spill' in df_supabase.columns:
                     df_supabase['result'] = df_supabase['has_spill'].apply(lambda x: 'Spill Detected ✅' if x else 'No Spill ❌')
                 
-                # Calculate stats
                 total_db_records = len(df_supabase)
                 spills_in_db = df_supabase['has_spill'].sum() if 'has_spill' in df_supabase.columns else 0
                 avg_coverage_db = df_supabase['coverage_percentage'].mean() if 'coverage_percentage' in df_supabase.columns else 0
@@ -1413,7 +1290,6 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Display columns to show
                 display_columns = []
                 column_config = {}
                 
@@ -1445,7 +1321,6 @@ def main():
                     display_columns.append('detected_pixels')
                     column_config['detected_pixels'] = st.column_config.NumberColumn("Detected Pixels", format="%d")
                 
-                # Display the dataframe
                 st.dataframe(
                     df_supabase[display_columns] if display_columns else df_supabase,
                     use_container_width=True,
@@ -1453,7 +1328,6 @@ def main():
                     column_config=column_config
                 )
                 
-                # Export options
                 col_db1, col_db2 = st.columns(2)
                 with col_db1:
                     csv_db = df_supabase.to_csv(index=False).encode('utf-8')
@@ -1474,7 +1348,7 @@ def main():
                         use_container_width=True
                     )
             else:
-                st.info("📭 No previous detections found in the database. Upload and analyze images to populate the database.")
+                st.info("🔭 No previous detections found in the database. Upload and analyze images to populate the database.")
     
     except Exception as e:
         st.error(f"❌ Error loading previous detections: {str(e)}")
@@ -1485,7 +1359,14 @@ def main():
     # ==================== FOOTER ====================
     st.markdown("""
     <div class="footer">
-        Built with ❤️ by <strong>Sandeep Prajapati</strong> | Powered by AI & Streamlit
+        <p style="margin-bottom: 10px;">🌊 <strong>HydroVexel</strong> - Protecting Our Oceans with AI</p>
+        <p>Built with ❤️ by <strong>Sandeep Prajapati</strong></p>
+        <p style="margin-top: 10px; font-size: 0.95rem; opacity: 0.9;">
+            Powered by Deep Learning • Streamlit • Supabase
+        </p>
+        <p style="margin-top: 15px; font-size: 0.85rem; opacity: 0.8;">
+            © 2025 HydroVexel. All rights reserved. | For environmental monitoring and research purposes.
+        </p>
     </div>
     """, unsafe_allow_html=True)
 

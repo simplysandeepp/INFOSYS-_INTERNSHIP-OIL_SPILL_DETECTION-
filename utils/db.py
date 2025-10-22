@@ -1,9 +1,13 @@
 # ============================================================================
-# DB.PY - Supabase Database Connection and Helper Functions
+# DB.PY - Supabase Database Connection and Helper Functions (FIXED VERSION)
 # ============================================================================
 
 from supabase import create_client, Client
 import os
+import io
+from PIL import Image
+from datetime import datetime
+import numpy as np
 
 # Initialize Supabase client
 supabase: Client = None
@@ -41,70 +45,157 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     supabase = None
     print("⚠️ Supabase credentials not found!")
-    print("   Please set SUPABASE_URL and SUPABASE_KEY in:")
-    print("   - .streamlit/secrets.toml (for Streamlit Cloud)")
-    print("   - .env file (for local development)")
 
 
-# -----------------------------
-# Helper functions for database
-# -----------------------------
+DEFAULT_TABLE = "oil_detections"
+STORAGE_BUCKET = "detection-images"  # Your Supabase storage bucket name
 
-DEFAULT_TABLE = "oil_detections"  # Default table name for oil spill detections
 
+# ============================================================================
+# IMAGE STORAGE FUNCTIONS (FIXED)
+# ============================================================================
+
+def ensure_pil_image(img):
+    """Convert numpy array or ensure PIL Image"""
+    if isinstance(img, np.ndarray):
+        # Ensure uint8
+        if img.dtype != np.uint8:
+            if img.max() <= 1.0:
+                img = (img * 255).astype(np.uint8)
+            else:
+                img = img.astype(np.uint8)
+        return Image.fromarray(img)
+    return img
+
+
+def save_images_to_storage(filename, overlay_img, heatmap_img, binary_mask_img):
+    """
+    Save detection images to Supabase Storage - FIXED VERSION
+    
+    Returns:
+        dict: URLs of saved images {'overlay': url, 'heatmap': url, 'binary_mask': url}
+        None: If upload failed completely
+    """
+    if supabase is None:
+        print("⚠️ Supabase client not initialized - cannot save images")
+        return None
+    
+    try:
+        # Create unique folder name with milliseconds for better uniqueness
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        base_name = filename.rsplit('.', 1)[0].replace(' ', '_').replace('(', '').replace(')', '')
+        folder = f"{timestamp}_{base_name}"
+        
+        images_data = {
+            'overlay': overlay_img,
+            'heatmap': heatmap_img,
+            'binary_mask': binary_mask_img
+        }
+        
+        urls = {}
+        upload_errors = []
+        
+        for img_type, img_data in images_data.items():
+            try:
+                # Convert to PIL Image
+                pil_img = ensure_pil_image(img_data)
+                
+                # Convert to bytes
+                img_bytes = io.BytesIO()
+                pil_img.save(img_bytes, format='PNG', optimize=True)
+                img_bytes.seek(0)
+                img_data_bytes = img_bytes.getvalue()
+                
+                # Define storage path
+                file_path = f"{folder}/{img_type}.png"
+                
+                print(f"📤 Uploading {img_type} to: {file_path} (size: {len(img_data_bytes)} bytes)")
+                
+                # Upload to Supabase Storage with proper error handling
+                try:
+                    response = supabase.storage.from_(STORAGE_BUCKET).upload(
+                        path=file_path,
+                        file=img_data_bytes,
+                        file_options={
+                            "content-type": "image/png",
+                            "upsert": "false"
+                        }
+                    )
+                    
+                    # Check if response indicates success
+                    if response:
+                        # Get public URL
+                        public_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(file_path)
+                        urls[img_type] = public_url
+                        print(f"✅ Successfully uploaded {img_type}: {public_url}")
+                    else:
+                        urls[img_type] = ""
+                        error_msg = f"Upload returned empty response for {img_type}"
+                        upload_errors.append(error_msg)
+                        print(f"❌ {error_msg}")
+                        
+                except Exception as upload_error:
+                    urls[img_type] = ""
+                    error_msg = f"Upload failed for {img_type}: {str(upload_error)}"
+                    upload_errors.append(error_msg)
+                    print(f"❌ {error_msg}")
+                
+            except Exception as img_error:
+                urls[img_type] = ""
+                error_msg = f"Image processing failed for {img_type}: {str(img_error)}"
+                upload_errors.append(error_msg)
+                print(f"❌ {error_msg}")
+        
+        # If all uploads failed, return None
+        if all(url == "" for url in urls.values()):
+            print(f"❌ All image uploads failed. Errors: {upload_errors}")
+            return None
+        
+        # Return URLs (some may be empty strings if failed)
+        if upload_errors:
+            print(f"⚠️ Some uploads had errors: {upload_errors}")
+        
+        return urls
+    
+    except Exception as e:
+        print(f"❌ Critical error in save_images_to_storage: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+# ============================================================================
+# DATABASE FUNCTIONS
+# ============================================================================
 
 def insert_detection_data(data: dict, table_name: str = DEFAULT_TABLE):
     """
     Insert a detection record into the Supabase table.
-    
-    Args:
-        data (dict): Detection data to insert with keys:
-            - timestamp: ISO format timestamp
-            - filename: Name of uploaded image
-            - has_spill: Boolean indicating if spill was detected
-            - coverage_percentage: Float percentage of image covered by spill
-            - avg_confidence: Float average confidence score
-            - max_confidence: Float maximum confidence score
-            - detected_pixels: Integer number of pixels detected as spill
-        table_name (str): Name of the Supabase table (default: oil_detections)
-    
-    Returns:
-        Response object from Supabase
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
     
     try:
         print(f"📤 Inserting data into table '{table_name}':")
-        print(f"   Data: {data}")
+        print(f"   Data keys: {list(data.keys())}")
+        print(f"   Has URLs: overlay={bool(data.get('overlay_url'))}, heatmap={bool(data.get('heatmap_url'))}, binary={bool(data.get('binary_mask_url'))}")
         
         response = supabase.table(table_name).insert(data).execute()
         
         print(f"✅ Successfully inserted record into '{table_name}'")
-        print(f"   Response: {response}")
         
         return response
     
     except Exception as e:
         print(f"❌ Error inserting data into '{table_name}': {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
 def fetch_all_detections(table_name: str = DEFAULT_TABLE):
     """
     Fetch all detection records from the Supabase table.
-    
-    Args:
-        table_name (str): Name of the Supabase table (default: oil_detections)
-    
-    Returns:
-        list: List of dictionaries containing detection records
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
@@ -126,16 +217,6 @@ def fetch_all_detections(table_name: str = DEFAULT_TABLE):
 def fetch_recent_detections(table_name: str = DEFAULT_TABLE, limit: int = 10):
     """
     Fetch recent detection records from the Supabase table.
-    
-    Args:
-        table_name (str): Name of the Supabase table (default: oil_detections)
-        limit (int): Maximum number of records to fetch (default: 10)
-    
-    Returns:
-        list: List of dictionaries containing recent detection records
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
@@ -154,18 +235,33 @@ def fetch_recent_detections(table_name: str = DEFAULT_TABLE, limit: int = 10):
         raise
 
 
+def fetch_detection_with_images(detection_id: int, table_name: str = DEFAULT_TABLE):
+    """
+    Fetch a specific detection record with all image URLs.
+    """
+    if not supabase:
+        raise RuntimeError("Supabase client not initialized. Check your credentials.")
+    
+    try:
+        print(f"📥 Fetching detection {detection_id} from table '{table_name}'...")
+        
+        response = supabase.table(table_name).select("*").eq('id', detection_id).execute()
+        
+        if response.data:
+            print(f"✅ Successfully fetched detection {detection_id}")
+            return response.data[0]
+        else:
+            print(f"⚠️ No detection found with id {detection_id}")
+            return None
+    
+    except Exception as e:
+        print(f"❌ Error fetching detection {detection_id}: {e}")
+        raise
+
+
 def fetch_spill_detections_only(table_name: str = DEFAULT_TABLE):
     """
     Fetch only records where oil spills were detected.
-    
-    Args:
-        table_name (str): Name of the Supabase table (default: oil_detections)
-    
-    Returns:
-        list: List of dictionaries containing spill detection records
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
@@ -187,16 +283,6 @@ def fetch_spill_detections_only(table_name: str = DEFAULT_TABLE):
 def delete_detection(record_id: int, table_name: str = DEFAULT_TABLE):
     """
     Delete a specific detection record by ID.
-    
-    Args:
-        record_id (int): ID of the record to delete
-        table_name (str): Name of the Supabase table (default: oil_detections)
-    
-    Returns:
-        Response object from Supabase
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
@@ -218,15 +304,6 @@ def delete_detection(record_id: int, table_name: str = DEFAULT_TABLE):
 def get_database_stats(table_name: str = DEFAULT_TABLE):
     """
     Get statistics about the database records.
-    
-    Args:
-        table_name (str): Name of the Supabase table (default: oil_detections)
-    
-    Returns:
-        dict: Statistics including total records, spills detected, average coverage, etc.
-    
-    Raises:
-        RuntimeError: If Supabase client is not initialized
     """
     if not supabase:
         raise RuntimeError("Supabase client not initialized. Check your credentials.")
@@ -278,9 +355,6 @@ def get_database_stats(table_name: str = DEFAULT_TABLE):
 def test_connection():
     """
     Test the Supabase database connection.
-    
-    Returns:
-        bool: True if connection is successful, False otherwise
     """
     if not supabase:
         print("❌ Supabase client not initialized")
@@ -293,12 +367,37 @@ def test_connection():
         response = supabase.table(DEFAULT_TABLE).select("*").limit(1).execute()
         
         print("✅ Supabase connection successful!")
-        print("   Table '" + DEFAULT_TABLE + "' is accessible")
+        print(f"   Table '{DEFAULT_TABLE}' is accessible")
         
         return True
     
     except Exception as e:
-        print("❌ Supabase connection test failed: " + str(e))
+        print(f"❌ Supabase connection test failed: {str(e)}")
+        return False
+
+
+def test_storage_connection():
+    """
+    Test the Supabase storage connection.
+    """
+    if not supabase:
+        print("❌ Supabase client not initialized")
+        return False
+    
+    try:
+        print(f"🔍 Testing Supabase storage bucket '{STORAGE_BUCKET}'...")
+        
+        # Try to list files in the bucket
+        response = supabase.storage.from_(STORAGE_BUCKET).list()
+        
+        print(f"✅ Storage bucket '{STORAGE_BUCKET}' is accessible!")
+        print(f"   Files in bucket: {len(response) if response else 0}")
+        
+        return True
+    
+    except Exception as e:
+        print(f"❌ Storage test failed: {str(e)}")
+        print(f"   Make sure bucket '{STORAGE_BUCKET}' exists and is public")
         return False
 
 
@@ -309,16 +408,20 @@ if __name__ == "__main__":
     print("="*60 + "\n")
     
     if test_connection():
-        print("\n✅ All database tests passed!")
+        print("\n✅ Database connection test passed!")
+        
+        # Test storage
+        if test_storage_connection():
+            print("\n✅ Storage connection test passed!")
         
         # Try to get stats
         try:
             stats = get_database_stats()
             print("\n📊 Database Statistics:")
             for key, value in stats.items():
-                print("   " + str(key) + ": " + str(value))
+                print(f"   {key}: {value}")
         except Exception as e:
-            print("\n⚠️ Could not fetch statistics: " + str(e))
+            print(f"\n⚠️ Could not fetch statistics: {str(e)}")
     else:
         print("\n❌ Database connection test failed!")
         print("\nTroubleshooting:")
