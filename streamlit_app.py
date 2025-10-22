@@ -718,25 +718,28 @@ def ensure_uint8(img):
             img = img.astype(np.uint8)
     return img
 
+import numpy as np
+from datetime import datetime
 
 def save_to_supabase(filename, has_spill, coverage_pct, avg_confidence, max_confidence, detected_pixels):
-    """Save detection data to Supabase database"""
+    """Save detection data to Supabase database with proper type conversion"""
     try:
         if supabase is None:
             print("⚠️ Supabase client not initialized - skipping database save")
             return False
         
+        # Convert NumPy types to native Python types
         data = {
             'timestamp': datetime.now().isoformat(),
-            'filename': filename,
-            'has_spill': has_spill,
+            'filename': str(filename),
+            'has_spill': bool(has_spill),  # Convert numpy.bool_ to Python bool
             'coverage_percentage': float(coverage_pct),
             'avg_confidence': float(avg_confidence),
             'max_confidence': float(max_confidence),
             'detected_pixels': int(detected_pixels)
         }
         
-        print(f"📝 Attempting to save to Supabase: {data}")
+        print(f"🔄 Attempting to save to Supabase: {data}")
         response = insert_detection_data(data, table_name="oil_detections")
         print(f"✅ Supabase save successful: {response}")
         return True
@@ -744,7 +747,6 @@ def save_to_supabase(filename, has_spill, coverage_pct, avg_confidence, max_conf
         print(f"❌ Error saving to Supabase: {str(e)}")
         st.warning(f"⚠️ Could not save to database: {str(e)}")
         return False
-
 
 # ------------------------ MAIN UI -----------------------------------------
 def main():
