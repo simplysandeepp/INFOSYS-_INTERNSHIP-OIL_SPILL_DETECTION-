@@ -134,49 +134,76 @@ header {visibility: hidden;}
     border: 2px solid #E0E0E0;
 }
 
+.gallery-success-message {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2E7D32;
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    padding: 15px 25px;
+    border-radius: 12px;
+    border: 2px solid #4CAF50;
+    margin: 20px 0;
+    text-align: center;
+}
+
 .image-gallery-card {
     background: #FFFFFF;
-    border-radius: 16px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 2px solid #E0E0E0;
-    transition: all 0.3s ease;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 25px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 3px solid #1976D2;
+    transition: all 0.4s ease;
+    animation: slideIn 0.6s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .image-gallery-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(25, 118, 210, 0.15);
-    border-color: #1976D2;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(25, 118, 210, 0.2);
+    border-color: #0D47A1;
 }
 
 .gallery-header-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #E0E0E0;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #1976D2;
 }
 
 .gallery-filename {
     font-family: 'Poppins', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: #0D1B2A;
 }
 
 .gallery-timestamp {
-    color: #4A5568;
-    font-size: 0.95rem;
+    color: #1E1E1E;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 5px;
 }
 
 .gallery-status-badge {
     display: inline-block;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    padding: 12px 28px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .status-detected {
@@ -189,74 +216,101 @@ header {visibility: hidden;}
     color: #FFFFFF;
 }
 
+.gallery-metadata-box {
+    margin: 20px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    border-radius: 12px;
+    border: 2px solid #1976D2;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0D1B2A;
+    line-height: 1.8;
+}
+
 .gallery-image-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 20px;
+    gap: 25px;
+    margin-top: 25px;
 }
 
 .gallery-image-box {
-    text-align: center;
-    padding: 15px;
-    background: #F8F9FA;
-    border-radius: 12px;
-    border: 2px solid #E0E0E0;
+    position: relative;
+    padding: 20px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+    border-radius: 16px;
+    border: 3px solid #1976D2;
     transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 .gallery-image-box:hover {
-    border-color: #1976D2;
-    background: #F0F7FF;
-    transform: translateY(-5px);
+    border-color: #0D47A1;
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(25, 118, 210, 0.2);
+}
+
+.gallery-image-label {
+    font-weight: 800;
+    color: #0D1B2A;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 10px;
+    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+    color: #FFFFFF;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .gallery-image-box img {
     width: 100%;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
     cursor: pointer;
     transition: transform 0.3s ease;
+    margin-top: 10px;
 }
 
 .gallery-image-box img:hover {
     transform: scale(1.05);
 }
 
-.gallery-image-label {
-    font-weight: 700;
-    color: #0D1B2A;
-    margin: 12px 0 8px 0;
-    font-size: 1rem;
-}
-
 .image-url-link {
     display: inline-block;
-    margin-top: 8px;
-    padding: 8px 16px;
+    margin-top: 15px;
+    padding: 12px 24px;
     background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
     color: white !important;
     text-decoration: none;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
     transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
 .image-url-link:hover {
     background: linear-gradient(135deg, #0D47A1 0%, #1976D2 100%);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    box-shadow: 0 6px 18px rgba(25, 118, 210, 0.4);
 }
 
 .no-image-box {
-    padding: 20px;
-    background: #FFF3E0;
-    border: 2px dashed #FF9800;
-    border-radius: 8px;
+    padding: 30px;
+    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+    border: 3px dashed #FF9800;
+    border-radius: 12px;
     color: #E65100;
-    font-weight: 600;
+    font-weight: 700;
+    text-align: center;
+    font-size: 1.1rem;
 }
 
 /* ================ CARDS ================ */
@@ -443,6 +497,90 @@ header {visibility: hidden;}
     margin: 20px 0;
     text-align: center;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* ================ RESULT CARD WITH ENHANCED STYLING ================ */
+.result-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border: 3px solid #1976D2;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(25, 118, 210, 0.2);
+}
+
+/* ================ TABS STYLING ================ */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: #FFFFFF;
+    padding: 10px;
+    border-radius: 12px;
+    border: 2px solid #E0E0E0;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: #F8F9FA;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 700;
+    color: #0D1B2A;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background: #E3F2FD;
+    border-color: #1976D2;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%) !important;
+    color: #FFFFFF !important;
+    border-color: #0D47A1 !important;
+}
+
+/* ================ TAB CONTENT BOXES ================ */
+.tab-content-box {
+    background: #FFFFFF;
+    padding: 30px;
+    border-radius: 16px;
+    border: 3px solid #1976D2;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.analysis-summary {
+    color: #0D1B2A;
+    line-height: 2;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.analysis-summary h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0D1B2A;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #1976D2;
+}
+
+.analysis-summary strong {
+    color: #1976D2;
+    font-weight: 700;
 }
 
 /* ================ STATS BANNER ================ */
@@ -675,7 +813,7 @@ def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confiden
 # ======================== NEW: IMAGE GALLERY FUNCTION ======================
 def display_detection_image_gallery():
     """
-    Display a gallery of stored detection images from Supabase
+    Display a gallery of stored detection images from Supabase with filter dropdown
     """
     st.markdown("""
     <div class="gallery-header">
@@ -694,7 +832,7 @@ def display_detection_image_gallery():
             data = fetch_all_detections("oil_detections")
         
         if not data or len(data) == 0:
-            st.info("📭 No images found in the database yet. Upload and analyze images to populate the gallery.")
+            st.info("🔭 No images found in the database yet. Upload and analyze images to populate the gallery.")
             return
         
         # Filter only detections that have at least one image URL
@@ -742,10 +880,59 @@ def display_detection_image_gallery():
                 """)
             return
         
-        st.success(f"✅ Found {len(detections_with_images)} detections with images")
+        st.markdown(f'<div class="gallery-success-message">✅ Found {len(detections_with_images)} detections with images</div>', unsafe_allow_html=True)
+        
+        # CREATE FILTER DROPDOWN
+        st.markdown("### 🔍 Filter Gallery")
+        
+        # Prepare filter options
+        filter_options = ["All Detections"]
+        
+        # Add date-based filters
+        dates = sorted(set([d.get('timestamp', '')[:10] for d in detections_with_images if d.get('timestamp')]), reverse=True)
+        for date in dates:
+            filter_options.append(f"Date: {date}")
+        
+        # Add status filters
+        filter_options.append("Status: Spill Detected")
+        filter_options.append("Status: Clean")
+        
+        # Add filename filters
+        filenames = sorted(set([d.get('filename', 'Unknown') for d in detections_with_images]))
+        for filename in filenames[:10]:  # Limit to first 10 filenames
+            filter_options.append(f"File: {filename}")
+        
+        selected_filter = st.selectbox(
+            "Select filter to view specific detections:",
+            options=filter_options,
+            index=0
+        )
+        
+        # Apply filter
+        filtered_detections = detections_with_images
+        
+        if selected_filter.startswith("Date: "):
+            filter_date = selected_filter.replace("Date: ", "")
+            filtered_detections = [d for d in detections_with_images if d.get('timestamp', '').startswith(filter_date)]
+        
+        elif selected_filter == "Status: Spill Detected":
+            filtered_detections = [d for d in detections_with_images if d.get('has_spill')]
+        
+        elif selected_filter == "Status: Clean":
+            filtered_detections = [d for d in detections_with_images if not d.get('has_spill')]
+        
+        elif selected_filter.startswith("File: "):
+            filter_filename = selected_filter.replace("File: ", "")
+            filtered_detections = [d for d in detections_with_images if d.get('filename') == filter_filename]
+        
+        if not filtered_detections:
+            st.warning(f"No detections found matching filter: {selected_filter}")
+            return
+        
+        st.info(f"📊 Showing {len(filtered_detections)} of {len(detections_with_images)} detections")
         
         # Display each detection in a card
-        for idx, detection in enumerate(detections_with_images):
+        for idx, detection in enumerate(filtered_detections):
             st.markdown(f"""
             <div class="image-gallery-card">
                 <div class="gallery-header-info">
@@ -759,7 +946,7 @@ def display_detection_image_gallery():
                         </span>
                     </div>
                 </div>
-                <div style="margin: 15px 0; padding: 15px; background: #F8F9FA; border-radius: 10px;">
+                <div class="gallery-metadata-box">
                     <strong>Coverage:</strong> {detection.get('coverage_percentage', 0):.2f}% | 
                     <strong>Avg Confidence:</strong> {detection.get('avg_confidence', 0):.3f} | 
                     <strong>Max Confidence:</strong> {detection.get('max_confidence', 0):.3f} | 
@@ -775,9 +962,11 @@ def display_detection_image_gallery():
             with col1:
                 overlay_url = detection.get('overlay_url', '')
                 if overlay_url and overlay_url != '':
-                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
-                    st.image(overlay_url, caption="Detection Overlay", use_column_width=True)
-                    st.markdown(f'<div class="gallery-image-label">Detection Overlay</div>', unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="gallery-image-box">
+                        <div class="gallery-image-label">Detection Overlay</div>
+                    """, unsafe_allow_html=True)
+                    st.image(overlay_url, use_column_width=True)
                     st.markdown(f'<a href="{overlay_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
                 else:
@@ -787,9 +976,11 @@ def display_detection_image_gallery():
             with col2:
                 heatmap_url = detection.get('heatmap_url', '')
                 if heatmap_url and heatmap_url != '':
-                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
-                    st.image(heatmap_url, caption="Confidence Heatmap", use_column_width=True)
-                    st.markdown(f'<div class="gallery-image-label">Confidence Heatmap</div>', unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="gallery-image-box">
+                        <div class="gallery-image-label">Confidence Heatmap</div>
+                    """, unsafe_allow_html=True)
+                    st.image(heatmap_url, use_column_width=True)
                     st.markdown(f'<a href="{heatmap_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
                 else:
@@ -799,9 +990,11 @@ def display_detection_image_gallery():
             with col3:
                 binary_url = detection.get('binary_mask_url', '')
                 if binary_url and binary_url != '':
-                    st.markdown('<div class="gallery-image-box">', unsafe_allow_html=True)
-                    st.image(binary_url, caption="Binary Mask", use_column_width=True)
-                    st.markdown(f'<div class="gallery-image-label">Binary Mask</div>', unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="gallery-image-box">
+                        <div class="gallery-image-label">Binary Mask</div>
+                    """, unsafe_allow_html=True)
+                    st.image(binary_url, use_column_width=True)
                     st.markdown(f'<a href="{binary_url}" target="_blank" class="image-url-link">🔗 Open Full Image</a>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
                 else:
@@ -816,8 +1009,7 @@ def display_detection_image_gallery():
         import traceback
         traceback.print_exc()
 
-
-# ------------------------ MAIN UI -----------------------------------------
+# ==================== MAIN UI -----------------------------------------
 def main():
     # Initialize database
     init_database()
@@ -1000,19 +1192,12 @@ def main():
                 """, unsafe_allow_html=True)
 
             # Results in properly aligned columns
-            st.markdown('<div class="results-container">', unsafe_allow_html=True)
-            
             col1, col2, col3 = st.columns(3, gap="medium")
             
             # Column 1: Detection Overlay
             with col1:
-                st.markdown("""
-                <div class="result-card">
-                    <h3 style="font-family: 'Poppins', sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.3rem; font-weight: 700; text-align: center; padding-bottom: 15px; border-bottom: 3px solid #1976D2;">
-                        Detection Overlay
-                    </h3>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Detection Overlay</h3>', unsafe_allow_html=True)
                 st.image(overlay, use_column_width=True, channels="RGB")
                 st.download_button(
                     "📥 Download Overlay",
@@ -1021,16 +1206,12 @@ def main():
                     mime='image/png',
                     use_container_width=True
                 )
+                st.markdown('</div>', unsafe_allow_html=True)
 
             # Column 2: Confidence Heatmap
             with col2:
-                st.markdown("""
-                <div class="result-card">
-                    <h3 style="font-family: 'Poppins', sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.3rem; font-weight: 700; text-align: center; padding-bottom: 15px; border-bottom: 3px solid #1976D2;">
-                        Confidence Heatmap
-                    </h3>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Confidence Heatmap</h3>', unsafe_allow_html=True)
                 st.image(heatmap, use_column_width=True, channels="RGB")
                 st.download_button(
                     "📥 Download Heatmap",
@@ -1039,16 +1220,12 @@ def main():
                     mime='image/png',
                     use_container_width=True
                 )
+                st.markdown('</div>', unsafe_allow_html=True)
 
             # Column 3: Metrics
             with col3:
-                st.markdown("""
-                <div class="result-card">
-                    <h3 style="font-family: 'Poppins', sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.3rem; font-weight: 700; text-align: center; padding-bottom: 15px; border-bottom: 3px solid #1976D2;">
-                        Detection Metrics
-                    </h3>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+                st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #0D1B2A; margin-bottom: 20px; font-size: 1.4rem; font-weight: 800; text-align: center; padding: 15px; background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%); color: #FFFFFF; border-radius: 12px;">Detection Metrics</h3>', unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
@@ -1077,15 +1254,15 @@ def main():
                     <div class="metric-label">Detected Pixels</div>
                 </div>
                 """, unsafe_allow_html=True)
-
-            st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
 
             # Additional details in tabs
             st.markdown("<br>", unsafe_allow_html=True)
             tab1, tab2, tab3 = st.tabs(["📊 Binary Mask", "📋 Raw JSON Data", "📈 Analysis Summary"])
 
             with tab1:
-                st.markdown('<div style="background: #FFFFFF; padding: 20px; border-radius: 12px; border: 2px solid #E0E0E0;">', unsafe_allow_html=True)
+                st.markdown('<div class="tab-content-box">', unsafe_allow_html=True)
                 st.image(
                     binary_mask,
                     caption='Binary segmentation mask (white = oil spill detected)',
@@ -1095,7 +1272,7 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with tab2:
-                st.markdown('<div style="background: #FFFFFF; padding: 20px; border-radius: 12px; border: 2px solid #E0E0E0;">', unsafe_allow_html=True)
+                st.markdown('<div class="tab-content-box">', unsafe_allow_html=True)
                 st.json({
                     'detection_status': 'Spill Detected' if results['metrics']['has_spill'] else 'No Spill',
                     'coverage_percentage': float(results['metrics']['coverage_percentage']),
@@ -1109,10 +1286,7 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
 
             with tab3:
-                st.markdown("""
-                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; border: 2px solid #E0E0E0;">
-                    <div style="color: #0D1B2A; line-height: 1.8;">
-                """, unsafe_allow_html=True)
+                st.markdown('<div class="tab-content-box"><div class="analysis-summary">', unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 ### Analysis Summary
@@ -1133,10 +1307,7 @@ def main():
                 {('- Immediate response required for cleanup operations' if results['metrics']['coverage_percentage'] > 5 else '- Monitor the area for potential expansion') if results['metrics']['has_spill'] else '- Continue routine monitoring'}
                 """)
                 
-                st.markdown("""
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown('</div></div>', unsafe_allow_html=True)
 
     # ==================== STATISTICS BANNER ====================
     st.markdown(f"""
@@ -1247,7 +1418,7 @@ def main():
     st.markdown("""
     <div class="database-header">
         <h2 class="section-title">📊 Previous Detections (Database Records)</h2>
-        <p style="color: #4A5568; font-size: 1.05rem; margin-top: 10px;">
+        <p style="color: #1E1E1E; font-size: 1.15rem; margin-top: 10px; font-weight: 600;">
             All detection metadata stored in the cloud database
         </p>
     </div>
