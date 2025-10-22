@@ -1126,10 +1126,10 @@ def main():
         Built with ❤️ by <strong>Sandeep Prajapati</strong> | Powered by AI & Streamlit
     </div>
     """, unsafe_allow_html=True)
-    
+
 st.markdown("### 📊 Previous Detections")
 
-data = fetch_all_detections()
+data = fetch_all_detections("detections")
 if data:
     df = pd.DataFrame(data)
     st.dataframe(df)
