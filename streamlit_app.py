@@ -12,7 +12,6 @@ import base64
 import pandas as pd
 from datetime import datetime
 import json
-from utils.db import insert_detection_data, fetch_all_detections
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +21,9 @@ from utils.visualization import (create_overlay, create_confidence_heatmap,
                                  add_metrics_overlay)
 from utils.preprocessing import validate_image
 import config.config as cfg
+
+# Import database functions
+from utils.db import insert_detection_data, fetch_all_detections, supabase
 
 # ------------------------ PAGE CONFIG --------------------------------------
 st.set_page_config(
@@ -374,18 +376,18 @@ header {visibility: hidden;}
     text-transform: uppercase;
     letter-spacing: 1px;
 }
-/* IMPROVED: Make file uploader text darker and more visible */
+
 [data-testid="stFileUploader"] label,
 [data-testid="stFileUploader"] small,
 [data-testid="stFileUploader"] div {
-    color: #8ca2de !important;
+    color: #0D1B2A !important;
     font-weight: 600 !important;
     font-size: 1.05rem !important;
 }
 
 [data-testid="stFileUploader"] small {
     font-size: 0.95rem !important;
-    color: #8ca2de !important;
+    color: #4A5568 !important;
 }
 
 /* ================ SUCCESS/ERROR ALERTS - HIGH CONTRAST ================ */
@@ -440,7 +442,6 @@ header {visibility: hidden;}
     border-color: #0D47A1;
 }
 
-/* Tab content styling for better text visibility */
 .stTabs [data-baseweb="tab-panel"] {
     padding-top: 20px;
 }
@@ -456,7 +457,6 @@ header {visibility: hidden;}
     color: #0D1B2A !important;
 }
 
-/* Markdown content in tabs */
 .stMarkdown {
     color: #0D1B2A;
 }
@@ -553,7 +553,6 @@ header {visibility: hidden;}
     margin-top: 8px;
 }
 
-/* Streamlit dataframe styling */
 [data-testid="stDataFrame"] {
     border-radius: 12px;
     overflow: hidden;
@@ -607,8 +606,8 @@ header {visibility: hidden;}
 
 /* ================ LOADING SPINNER ================ */
 .stSpinner > div {
-    border-top-color: #8ca2de !important;
-    border-right-color: #8ca2de !important;
+    border-top-color: #1976D2 !important;
+    border-right-color: #1976D2 !important;
 }
 
 /* ================ IMAGE CONTAINERS - PROPER BORDERS ================ */
@@ -720,6 +719,33 @@ def ensure_uint8(img):
     return img
 
 
+def save_to_supabase(filename, has_spill, coverage_pct, avg_confidence, max_confidence, detected_pixels):
+    """Save detection data to Supabase database"""
+    try:
+        if supabase is None:
+            print("⚠️ Supabase client not initialized - skipping database save")
+            return False
+        
+        data = {
+            'timestamp': datetime.now().isoformat(),
+            'filename': filename,
+            'has_spill': has_spill,
+            'coverage_percentage': float(coverage_pct),
+            'avg_confidence': float(avg_confidence),
+            'max_confidence': float(max_confidence),
+            'detected_pixels': int(detected_pixels)
+        }
+        
+        print(f"📝 Attempting to save to Supabase: {data}")
+        response = insert_detection_data(data, table_name="oil_detections")
+        print(f"✅ Supabase save successful: {response}")
+        return True
+    except Exception as e:
+        print(f"❌ Error saving to Supabase: {str(e)}")
+        st.warning(f"⚠️ Could not save to database: {str(e)}")
+        return False
+
+
 # ------------------------ MAIN UI -----------------------------------------
 def main():
     # Initialize database
@@ -796,7 +822,7 @@ def main():
             value=cfg.OVERLAY_ALPHA,
             step=0.05,
             help="Transparency of the detection overlay"
-        )
+    )
 
     # Action buttons
     col_btn1, col_btn2 = st.columns(2)
@@ -826,8 +852,18 @@ def main():
             if results['metrics']['has_spill']:
                 st.session_state.total_detections += 1
 
-            # Add record to database
+            # Add record to local session database
             add_detection_record(
+                filename=uploaded_file.name,
+                has_spill=results['metrics']['has_spill'],
+                coverage_pct=results['metrics']['coverage_percentage'],
+                avg_confidence=results['metrics']['avg_confidence'],
+                max_confidence=results['metrics']['max_confidence'],
+                detected_pixels=results['metrics']['detected_pixels']
+            )
+
+            # Save to Supabase database
+            save_to_supabase(
                 filename=uploaded_file.name,
                 has_spill=results['metrics']['has_spill'],
                 coverage_pct=results['metrics']['coverage_percentage'],
@@ -1014,6 +1050,8 @@ def main():
                 """)
                 
                 st.markdown("""
+                    </div>
+                </div>
                 """, unsafe_allow_html=True)
 
     # ==================== STATISTICS BANNER ====================
@@ -1040,7 +1078,7 @@ def main():
         
         st.markdown("""
         <div class="database-header">
-            <h2 class="section-title">📊 Live Detection Database</h2>
+            <h2 class="section-title">📊 Live Detection Database (Session)</h2>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1113,12 +1151,135 @@ def main():
     else:
         st.markdown("""
         <div class="database-section">
-            <h2 class="section-title">📊 Live Detection Database</h2>
+            <h2 class="section-title">📊 Live Detection Database (Session)</h2>
             <p style="text-align: center; color: #4A5568; padding: 40px 0; font-size: 1.1rem;">
                 No records yet. Upload and analyze images to see detection history here.
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+    # ==================== PREVIOUS DETECTIONS FROM SUPABASE ====================
+    st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="database-section">', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="database-header">
+        <h2 class="section-title">📊 Previous Detections (Supabase Database)</h2>
+        <p style="color: #4A5568; font-size: 1.05rem; margin-top: 10px;">
+            All detections stored in the cloud database across all sessions
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    try:
+        if supabase is None:
+            st.info("⚠️ Supabase database not configured. Only session data is available.")
+        else:
+            with st.spinner("Loading previous detections from database..."):
+                data = fetch_all_detections("oil_detections")
+            
+            if data and len(data) > 0:
+                # Convert to DataFrame
+                df_supabase = pd.DataFrame(data)
+                
+                # Format the dataframe for better display
+                if 'timestamp' in df_supabase.columns:
+                    df_supabase['timestamp'] = pd.to_datetime(df_supabase['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Add result column based on has_spill
+                if 'has_spill' in df_supabase.columns:
+                    df_supabase['result'] = df_supabase['has_spill'].apply(lambda x: 'Spill Detected ✅' if x else 'No Spill ❌')
+                
+                # Calculate stats
+                total_db_records = len(df_supabase)
+                spills_in_db = df_supabase['has_spill'].sum() if 'has_spill' in df_supabase.columns else 0
+                avg_coverage_db = df_supabase['coverage_percentage'].mean() if 'coverage_percentage' in df_supabase.columns else 0
+                
+                st.markdown(f"""
+                <div class="db-stats">
+                    <div class="db-stat-box">
+                        <div class="db-stat-value">{total_db_records}</div>
+                        <div class="db-stat-label">Total Detections</div>
+                    </div>
+                    <div class="db-stat-box">
+                        <div class="db-stat-value">{spills_in_db}</div>
+                        <div class="db-stat-label">Spills Detected</div>
+                    </div>
+                    <div class="db-stat-box">
+                        <div class="db-stat-value">{avg_coverage_db:.1f}%</div>
+                        <div class="db-stat-label">Avg Coverage</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Display columns to show
+                display_columns = []
+                column_config = {}
+                
+                if 'timestamp' in df_supabase.columns:
+                    display_columns.append('timestamp')
+                    column_config['timestamp'] = st.column_config.TextColumn("Timestamp", width="medium")
+                
+                if 'filename' in df_supabase.columns:
+                    display_columns.append('filename')
+                    column_config['filename'] = st.column_config.TextColumn("Image File", width="medium")
+                
+                if 'result' in df_supabase.columns:
+                    display_columns.append('result')
+                    column_config['result'] = st.column_config.TextColumn("Result", width="small")
+                
+                if 'coverage_percentage' in df_supabase.columns:
+                    display_columns.append('coverage_percentage')
+                    column_config['coverage_percentage'] = st.column_config.NumberColumn("Coverage %", format="%.2f")
+                
+                if 'avg_confidence' in df_supabase.columns:
+                    display_columns.append('avg_confidence')
+                    column_config['avg_confidence'] = st.column_config.NumberColumn("Avg Confidence", format="%.3f")
+                
+                if 'max_confidence' in df_supabase.columns:
+                    display_columns.append('max_confidence')
+                    column_config['max_confidence'] = st.column_config.NumberColumn("Max Confidence", format="%.3f")
+                
+                if 'detected_pixels' in df_supabase.columns:
+                    display_columns.append('detected_pixels')
+                    column_config['detected_pixels'] = st.column_config.NumberColumn("Detected Pixels", format="%d")
+                
+                # Display the dataframe
+                st.dataframe(
+                    df_supabase[display_columns] if display_columns else df_supabase,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config=column_config
+                )
+                
+                # Export options
+                col_db1, col_db2 = st.columns(2)
+                with col_db1:
+                    csv_db = df_supabase.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        "📥 Export All Detections (CSV)",
+                        data=csv_db,
+                        file_name=f'supabase_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv',
+                        mime='text/csv',
+                        use_container_width=True
+                    )
+                with col_db2:
+                    json_db = df_supabase.to_json(orient='records', indent=2)
+                    st.download_button(
+                        "📥 Export All Detections (JSON)",
+                        data=json_db,
+                        file_name=f'supabase_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json',
+                        mime='application/json',
+                        use_container_width=True
+                    )
+            else:
+                st.info("📭 No previous detections found in the database. Upload and analyze images to populate the database.")
+    
+    except Exception as e:
+        st.error(f"❌ Error loading previous detections: {str(e)}")
+        print(f"Database error: {e}")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ==================== FOOTER ====================
     st.markdown("""
@@ -1127,16 +1288,6 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("### 📊 Previous Detections")
-
-data = fetch_all_detections("oil_detections")
-if data:
-    df = pd.DataFrame(data)
-    st.dataframe(df)
-else:
-    st.info("No previous detections found.")
-
 
 if __name__ == '__main__':
     main()
-
