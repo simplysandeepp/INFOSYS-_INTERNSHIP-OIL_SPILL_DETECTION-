@@ -36,3 +36,5 @@ best_model.h5
 
 # Notebooks
 *.ipynb_checkpoints
+
+.env

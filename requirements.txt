@@ -24,3 +24,6 @@ gdown==5.1.0
 
 # Compatibility fix
 protobuf==4.25.3
+
+supabase
+python-dotenv

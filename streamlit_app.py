@@ -12,6 +12,7 @@ import base64
 import pandas as pd
 from datetime import datetime
 import json
+from utils.db import insert_detection_data, fetch_all_detections
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -1125,7 +1126,17 @@ def main():
         Built with ❤️ by <strong>Sandeep Prajapati</strong> | Powered by AI & Streamlit
     </div>
     """, unsafe_allow_html=True)
+    
+st.markdown("### 📊 Previous Detections")
+
+data = fetch_all_detections()
+if data:
+    df = pd.DataFrame(data)
+    st.dataframe(df)
+else:
+    st.info("No previous detections found.")
 
 
 if __name__ == '__main__':
     main()
+
