@@ -1129,7 +1129,7 @@ def main():
 
 st.markdown("### 📊 Previous Detections")
 
-data = fetch_all_detections("detections")
+data = fetch_all_detections("oil_detections")
 if data:
     df = pd.DataFrame(data)
     st.dataframe(df)
