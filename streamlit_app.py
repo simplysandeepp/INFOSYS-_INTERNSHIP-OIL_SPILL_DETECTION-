@@ -34,85 +34,75 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# UI Enhancement: Ocean Background Video & Custom Styling
-import base64
+# UI Enhancement: Ocean Background Video (YouTube Embed) & Custom Styling
+import streamlit as st
 from pathlib import Path
 
 def inject_ocean_ui():
-    """Inject ocean video background and custom CSS styling"""
-    
-    # Get the base directory
+    """Inject YouTube video background and custom CSS styling"""
+
     BASE_DIR = Path(__file__).parent
-    
-    # Load and encode the video file
-    video_file = BASE_DIR / "styles" / "ocean.mp4"
-    
-    if video_file.exists():
-        with open(video_file, "rb") as f:
-            video_bytes = f.read()
-        video_base64 = base64.b64encode(video_bytes).decode()
-        
-        # Inject video background HTML
-        st.markdown(f"""
-        <style>
-            /* Video Background Container */
-            .video-background {{
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: -2;
-                overflow: hidden;
-                pointer-events: none;
-            }}
-            
-            .video-background video {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                min-width: 100%;
-                min-height: 100%;
-                width: auto;
-                height: auto;
-                transform: translate(-50%, -50%);
-                opacity: 0.7;
-                object-fit: cover;
-            }}
-            
-            /* Dark Overlay */
-            .video-overlay {{
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 20, 40, 0.5);
-                z-index: -1;
-                pointer-events: none;
-            }}
-        </style>
-        
-        <div class="video-background">
-            <video autoplay muted loop playsinline>
-                <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
-            </video>
-        </div>
-        <div class="video-overlay"></div>
-        """, unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ ocean.mp4 not found in styles folder")
-    
-    # Load custom CSS
+
+    # 🎥 YouTube video embed
+    yt_embed_url = "https://www.youtube.com/embed/K-D6rnKOlbk?autoplay=1&mute=1&loop=1&playlist=K-D6rnKOlbk&controls=0&showinfo=0&modestbranding=1"
+
+    st.markdown(f"""
+    <style>
+        /* Fullscreen YouTube Background */
+        .video-background {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: -2;
+        }}
+
+        .video-background iframe {{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120vw;
+            height: 120vh;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.7;
+        }}
+
+        /* Dark overlay for readability */
+        .video-overlay {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 20, 40, 0.5);
+            z-index: -1;
+            pointer-events: none;
+        }}
+    </style>
+
+    <div class="video-background">
+        <iframe
+            src="{yt_embed_url}"
+            frameborder="0"
+            allow="autoplay; fullscreen"
+            allowfullscreen
+        ></iframe>
+    </div>
+    <div class="video-overlay"></div>
+    """, unsafe_allow_html=True)
+
+    # 🎨 Custom CSS loading
     css_file = BASE_DIR / "styles" / "custom.css"
-    
     if css_file.exists():
         with open(css_file) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
         st.warning("⚠️ custom.css not found in styles folder")
 
-# Call the injection function
+# Call the function
 inject_ocean_ui()
 
 
