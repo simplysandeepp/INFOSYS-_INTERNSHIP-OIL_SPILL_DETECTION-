@@ -76,7 +76,7 @@ def inject_ocean_ui():
                 width: auto;
                 height: auto;
                 transform: translate(-50%, -50%);
-                opacity: 0.8;
+                opacity: 0.7;
                 object-fit: cover;
             }}
             

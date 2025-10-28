@@ -61,11 +61,12 @@ strong {
 .tab-content-box, .database-section,
 .image-gallery-card, .gallery-header,
 .database-header, .filter-section {
-    background: var(--glass-effect) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 2px solid rgba(0, 188, 212, 0.3) !important;
-    box-shadow: 0 8px 32px rgba(0, 109, 119, 0.4),
+    background: rgba(0, 31, 63, 0.35) !important; /* lighter glass */
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(0, 188, 212, 0.35) !important;
+    box-shadow: 0 8px 32px rgba(0, 188, 212, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    transition: all 0.3s ease-in-out !important;
 }
 
 .info-card:hover, .result-card:hover, 
@@ -282,6 +283,13 @@ a:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, var(--accent-cyan) 0%, #00e5ff 100%);
     box-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+}
+
+/* Sidebar transparency */
+[data-testid="stSidebar"] {
+    background: rgba(0, 31, 63, 0.4) !important;
+    backdrop-filter: blur(10px) !important;
+    border-right: 2px solid rgba(0, 188, 212, 0.3) !important;
 }
 
 /* ================ GLASSMORPHISM ANIMATION ================ */
