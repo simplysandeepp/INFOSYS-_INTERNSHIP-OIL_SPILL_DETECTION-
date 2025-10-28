@@ -34,6 +34,88 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# UI Enhancement: Ocean Background Video & Custom Styling
+import base64
+from pathlib import Path
+
+def inject_ocean_ui():
+    """Inject ocean video background and custom CSS styling"""
+    
+    # Get the base directory
+    BASE_DIR = Path(__file__).parent
+    
+    # Load and encode the video file
+    video_file = BASE_DIR / "styles" / "ocean.mp4"
+    
+    if video_file.exists():
+        with open(video_file, "rb") as f:
+            video_bytes = f.read()
+        video_base64 = base64.b64encode(video_bytes).decode()
+        
+        # Inject video background HTML
+        st.markdown(f"""
+        <style>
+            /* Video Background Container */
+            .video-background {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: -2;
+                overflow: hidden;
+                pointer-events: none;
+            }}
+            
+            .video-background video {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                min-width: 100%;
+                min-height: 100%;
+                width: auto;
+                height: auto;
+                transform: translate(-50%, -50%);
+                opacity: 0.7;
+                object-fit: cover;
+            }}
+            
+            /* Dark Overlay */
+            .video-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 20, 40, 0.5);
+                z-index: -1;
+                pointer-events: none;
+            }}
+        </style>
+        
+        <div class="video-background">
+            <video autoplay muted loop playsinline>
+                <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+            </video>
+        </div>
+        <div class="video-overlay"></div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ ocean.mp4 not found in styles folder")
+    
+    # Load custom CSS
+    css_file = BASE_DIR / "styles" / "custom.css"
+    
+    if css_file.exists():
+        with open(css_file) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ custom.css not found in styles folder")
+
+# Call the injection function
+inject_ocean_ui()
+
+
 # ------------------------ PREMIUM CRYSTAL BLUE STYLES ----------------------
 import streamlit as st
 from pathlib import Path
