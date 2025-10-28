@@ -1,5 +1,5 @@
 # ============================================================================
-# STREAMLIT_APP.PY - Premium Crystal UI Version
+# STREAMLIT_APP.PY - Premium Crystal UI Version (FIXED)
 # ============================================================================
 
 import streamlit as st
@@ -34,75 +34,81 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# UI Enhancement: Ocean Background Video (YouTube Embed) & Custom Styling
-import streamlit as st
+# UI Enhancement: Ocean Background Video & Custom Styling
+import base64
 from pathlib import Path
 
 def inject_ocean_ui():
-    """Inject YouTube video background and custom CSS styling"""
-
+    """Inject ocean video background and custom CSS styling"""
+    
+    # Get the base directory
     BASE_DIR = Path(__file__).parent
-
-    # 🎥 YouTube video embed
-    yt_embed_url = "https://www.youtube.com/embed/K-D6rnKOlbk?autoplay=1&mute=1&loop=1&playlist=K-D6rnKOlbk&controls=0&showinfo=0&modestbranding=1"
-
-    st.markdown(f"""
-    <style>
-        /* Fullscreen YouTube Background */
-        .video-background {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            z-index: -2;
-        }}
-
-        .video-background iframe {{
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120vw;
-            height: 120vh;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            opacity: 0.7;
-        }}
-
-        /* Dark overlay for readability */
-        .video-overlay {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 20, 40, 0.5);
-            z-index: -1;
-            pointer-events: none;
-        }}
-    </style>
-
-    <div class="video-background">
-        <iframe
-            src="{yt_embed_url}"
-            frameborder="0"
-            allow="autoplay; fullscreen"
-            allowfullscreen
-        ></iframe>
-    </div>
-    <div class="video-overlay"></div>
-    """, unsafe_allow_html=True)
-
-    # 🎨 Custom CSS loading
+    
+    # Load and encode the video file
+    video_file = BASE_DIR / "styles" / "ocean.mp4"
+    
+    if video_file.exists():
+        with open(video_file, "rb") as f:
+            video_bytes = f.read()
+        video_base64 = base64.b64encode(video_bytes).decode()
+        
+        # Inject video background HTML
+        st.markdown(f"""
+        <style>
+            /* Video Background Container */
+            .video-background {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: -2;
+                overflow: hidden;
+                pointer-events: none;
+            }}
+            
+            .video-background video {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                min-width: 100%;
+                min-height: 100%;
+                width: auto;
+                height: auto;
+                transform: translate(-50%, -50%);
+                opacity: 0.7;
+                object-fit: cover;
+            }}
+            
+            /* Dark Overlay */
+            .video-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 20, 40, 0.5);
+                z-index: -1;
+                pointer-events: none;
+            }}
+        </style>
+        
+        <div class="video-background">
+            <video autoplay muted loop playsinline>
+                <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+            </video>
+        </div>
+        <div class="video-overlay"></div>
+        """, unsafe_allow_html=True)
+    
+    # Load custom CSS
     css_file = BASE_DIR / "styles" / "custom.css"
+    
     if css_file.exists():
         with open(css_file) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ custom.css not found in styles folder")
 
-# Call the function
+# Call the injection function
 inject_ocean_ui()
 
 
@@ -110,11 +116,12 @@ inject_ocean_ui()
 import streamlit as st
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent  # Directory where your streamlit_app.py is
+BASE_DIR = Path(__file__).parent
 css_file = BASE_DIR / "styles" / "styles2.css"
 
-with open(css_file) as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+if css_file.exists():
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 # ------------------------ DATABASE HELPERS ---------------------------------
@@ -242,12 +249,12 @@ def save_to_supabase_with_images(filename, has_spill, coverage_pct, avg_confiden
 # ======================== IMAGE GALLERY FUNCTION ======================
 def display_detection_image_gallery():
     """
-    Display a gallery of stored detection images from Supabase with DATE FILTER ONLY
+    Display a gallery of stored detection images from Supabase - ONLY after date selection
     """
     st.markdown("""
     <div class="gallery-header">
         <h2>🖼️ Detection Image Gallery</h2>
-        <p>View all stored detection images from the cloud database</p>
+        <p>Select a date to view stored detection images from the cloud database</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -256,7 +263,7 @@ def display_detection_image_gallery():
             st.info("⚠️ Supabase database not configured. Image gallery is unavailable.")
             return
         
-        with st.spinner("Loading images from database..."):
+        with st.spinner("Loading available dates..."):
             data = fetch_all_detections("oil_detections")
         
         if not data or len(data) == 0:
@@ -277,35 +284,36 @@ def display_detection_image_gallery():
         
         st.markdown(f'<div class="gallery-success-message">✅ Found {len(detections_with_images)} detections with images</div>', unsafe_allow_html=True)
         
-        # DATE FILTER ONLY
+        # DATE FILTER - REQUIRED
         st.markdown('<div class="filter-section">', unsafe_allow_html=True)
-        st.markdown('<h3>📅 Filter by Date</h3>', unsafe_allow_html=True)
+        st.markdown('<h3>📅 Select Date to View Images</h3>', unsafe_allow_html=True)
         
         # Extract unique dates
         dates = sorted(set([d.get('timestamp', '')[:10] for d in detections_with_images if d.get('timestamp')]), reverse=True)
         
-        # Create filter options - DATE ONLY
-        filter_options = ["All Dates"] + dates
-        
+        # Create filter options - DATE SELECTION REQUIRED
         selected_filter = st.selectbox(
-            "Select a date to view detections:",
-            options=filter_options,
-            index=0
+            "Choose a date:",
+            options=["-- Select a Date --"] + dates,
+            index=0,
+            key="image_gallery_date_filter"
         )
         
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # Apply date filter
-        filtered_detections = detections_with_images
+        # ONLY SHOW IMAGES IF DATE IS SELECTED
+        if selected_filter == "-- Select a Date --":
+            st.info("👆 Please select a date above to view detection images.")
+            return
         
-        if selected_filter != "All Dates":
-            filtered_detections = [d for d in detections_with_images if d.get('timestamp', '').startswith(selected_filter)]
+        # Apply date filter
+        filtered_detections = [d for d in detections_with_images if d.get('timestamp', '').startswith(selected_filter)]
         
         if not filtered_detections:
             st.warning(f"No detections found for date: {selected_filter}")
             return
         
-        st.info(f"📊 Showing {len(filtered_detections)} of {len(detections_with_images)} detections")
+        st.info(f"📊 Showing {len(filtered_detections)} detection(s) from {selected_filter}")
         
         # Display each detection in a card
         for idx, detection in enumerate(filtered_detections):
@@ -383,6 +391,157 @@ def display_detection_image_gallery():
         print(f"Gallery error: {e}")
         import traceback
         traceback.print_exc()
+
+
+# ==================== PREVIOUS DETECTIONS FUNCTION (DATE FILTER REQUIRED) ====================
+def display_previous_detections():
+    """Display previous detections from Supabase - ONLY after date selection"""
+    st.markdown("""
+    <div class="database-header">
+        <h2 class="section-title">📊 Previous Detections (Database Records)</h2>
+        <p style="color: #1E1E1E; font-size: 1.15rem; margin-top: 10px; font-weight: 600;">
+            Select a date to view detection metadata from the cloud database
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    try:
+        if supabase is None:
+            st.info("⚠️ Supabase database not configured. Only session data is available.")
+            return
+        
+        # Load all detections to get available dates
+        with st.spinner("Loading available dates..."):
+            all_data = fetch_all_detections("oil_detections")
+        
+        if not all_data or len(all_data) == 0:
+            st.info("🔭 No detections found in the database. Upload and analyze images to populate the database.")
+            return
+        
+        # Extract unique dates
+        dates = sorted(set([d.get('timestamp', '')[:10] for d in all_data if d.get('timestamp')]), reverse=True)
+        
+        if not dates:
+            st.warning("⚠️ No valid dates found in detection records.")
+            return
+        
+        # DATE SELECTION - REQUIRED
+        st.markdown('<div class="filter-section">', unsafe_allow_html=True)
+        st.markdown('<h3>📅 Select Date to View Detections</h3>', unsafe_allow_html=True)
+        
+        selected_date = st.selectbox(
+            "Choose a date:",
+            options=["-- Select a Date --"] + dates,
+            index=0,
+            key="prev_detection_date_filter"
+        )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # ONLY SHOW DATA IF DATE IS SELECTED
+        if selected_date == "-- Select a Date --":
+            st.info("👆 Please select a date above to view detection records.")
+            return
+        
+        # Filter data by selected date
+        filtered_data = [d for d in all_data if d.get('timestamp', '').startswith(selected_date)]
+        
+        if not filtered_data:
+            st.warning(f"No detections found for date: {selected_date}")
+            return
+        
+        # Convert to DataFrame
+        df_supabase = pd.DataFrame(filtered_data)
+        
+        if 'timestamp' in df_supabase.columns:
+            df_supabase['timestamp'] = pd.to_datetime(df_supabase['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        
+        if 'has_spill' in df_supabase.columns:
+            df_supabase['result'] = df_supabase['has_spill'].apply(lambda x: 'Spill Detected ✅' if x else 'No Spill ❌')
+        
+        total_db_records = len(df_supabase)
+        spills_in_db = df_supabase['has_spill'].sum() if 'has_spill' in df_supabase.columns else 0
+        avg_coverage_db = df_supabase['coverage_percentage'].mean() if 'coverage_percentage' in df_supabase.columns else 0
+        
+        st.markdown(f"""
+        <div class="db-stats">
+            <div class="db-stat-box">
+                <div class="db-stat-value">{total_db_records}</div>
+                <div class="db-stat-label">Detections on {selected_date}</div>
+            </div>
+            <div class="db-stat-box">
+                <div class="db-stat-value">{spills_in_db}</div>
+                <div class="db-stat-label">Spills Detected</div>
+            </div>
+            <div class="db-stat-box">
+                <div class="db-stat-value">{avg_coverage_db:.1f}%</div>
+                <div class="db-stat-label">Avg Coverage</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        display_columns = []
+        column_config = {}
+        
+        if 'timestamp' in df_supabase.columns:
+            display_columns.append('timestamp')
+            column_config['timestamp'] = st.column_config.TextColumn("Timestamp", width="medium")
+        
+        if 'filename' in df_supabase.columns:
+            display_columns.append('filename')
+            column_config['filename'] = st.column_config.TextColumn("Image File", width="medium")
+        
+        if 'result' in df_supabase.columns:
+            display_columns.append('result')
+            column_config['result'] = st.column_config.TextColumn("Result", width="small")
+        
+        if 'coverage_percentage' in df_supabase.columns:
+            display_columns.append('coverage_percentage')
+            column_config['coverage_percentage'] = st.column_config.NumberColumn("Coverage %", format="%.2f")
+        
+        if 'avg_confidence' in df_supabase.columns:
+            display_columns.append('avg_confidence')
+            column_config['avg_confidence'] = st.column_config.NumberColumn("Avg Confidence", format="%.3f")
+        
+        if 'max_confidence' in df_supabase.columns:
+            display_columns.append('max_confidence')
+            column_config['max_confidence'] = st.column_config.NumberColumn("Max Confidence", format="%.3f")
+        
+        if 'detected_pixels' in df_supabase.columns:
+            display_columns.append('detected_pixels')
+            column_config['detected_pixels'] = st.column_config.NumberColumn("Detected Pixels", format="%d")
+        
+        st.dataframe(
+            df_supabase[display_columns] if display_columns else df_supabase,
+            use_container_width=True,
+            hide_index=True,
+            column_config=column_config
+        )
+        
+        col_db1, col_db2 = st.columns(2)
+        with col_db1:
+            csv_db = df_supabase.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                f"📥 Export {selected_date} Detections (CSV)",
+                data=csv_db,
+                file_name=f'detections_{selected_date}.csv',
+                mime='text/csv',
+                use_container_width=True
+            )
+        with col_db2:
+            json_db = df_supabase.to_json(orient='records', indent=2)
+            st.download_button(
+                f"📥 Export {selected_date} Detections (JSON)",
+                data=json_db,
+                file_name=f'detections_{selected_date}.json',
+                mime='application/json',
+                use_container_width=True
+            )
+    
+    except Exception as e:
+        st.error(f"❌ Error loading previous detections: {str(e)}")
+        print(f"Database error: {e}")
+
 
 # ==================== MAIN UI -----------------------------------------
 def main():
@@ -552,7 +711,7 @@ def main():
                         🚨 OIL SPILL DETECTED
                     </div>
                     <p style="font-size: 1.4rem; color: #ffffff; font-weight: 700; margin-top: 15px;">
-                        Coverage: {results['metrics']['coverage_percentage']:.2f}%
+                        Spill Coverage: {results['metrics']['coverage_percentage']:.2f}%
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -563,7 +722,7 @@ def main():
                         ✅ NO OIL SPILL DETECTED
                     </div>
                     <p style="font-size: 1.4rem; color: #ffffff; font-weight: 700; margin-top: 15px;">
-                        Area is clean
+                        Water Area is Clean
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -573,7 +732,6 @@ def main():
             
             # Column 1: Detection Overlay
             with col1:
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Detection Overlay</h3>', unsafe_allow_html=True)
                 st.image(overlay, use_column_width=True, channels="RGB")
                 st.download_button(
@@ -583,11 +741,9 @@ def main():
                     mime='image/png',
                     use_container_width=True
                 )
-                st.markdown('</div>', unsafe_allow_html=True)
 
             # Column 2: Confidence Heatmap
             with col2:
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Confidence Heatmap</h3>', unsafe_allow_html=True)
                 st.image(heatmap, use_column_width=True, channels="RGB")
                 st.download_button(
@@ -597,42 +753,38 @@ def main():
                     mime='image/png',
                     use_container_width=True
                 )
-                st.markdown('</div>', unsafe_allow_html=True)
 
             # Column 3: Metrics
             with col3:
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 st.markdown('<h3 style="font-family: Poppins, sans-serif; color: #ffffff; margin-bottom: 20px; font-size: 1.5rem; font-weight: 900; text-align: center; padding: 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">Detection Metrics</h3>', unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
                     <div class="metric-value">{results['metrics']['coverage_percentage']:.2f}%</div>
-                    <div class="metric-label">Coverage Area</div>
+                    <div class="metric-label">Spill Coverage Area</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
                     <div class="metric-value">{results['metrics']['avg_confidence']:.1%}</div>
-                    <div class="metric-label">Avg Confidence</div>
+                    <div class="metric-label">Average Confidence Level</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
                     <div class="metric-value">{results['metrics']['max_confidence']:.1%}</div>
-                    <div class="metric-label">Max Confidence</div>
+                    <div class="metric-label">Maximum Confidence Level</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 st.markdown(f"""
                 <div class="metric-box">
                     <div class="metric-value">{results['metrics']['detected_pixels']:,}</div>
-                    <div class="metric-label">Detected Pixels</div>
+                    <div class="metric-label">Total Detected Pixels</div>
                 </div>
                 """, unsafe_allow_html=True)
-                
-                st.markdown('</div>', unsafe_allow_html=True)
 
             # Additional details in tabs
             st.markdown("<br>", unsafe_allow_html=True)
@@ -703,6 +855,7 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
     # ==================== LIVE DATABASE SECTION ====================
     if st.session_state.detection_records:
         
@@ -785,30 +938,64 @@ def main():
         </div>
         """, unsafe_allow_html=True)
 
-    # ==================== IMAGE GALLERY SECTION (NEW!) ====================
+    # ==================== IMAGE GALLERY SECTION ====================
     st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)
     display_detection_image_gallery()
 
-    # ==================== PREVIOUS DETECTIONS FROM SUPABASE ====================
-    st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)    
+    # ==================== PREVIOUS DETECTIONS FROM SUPABASE (WITH VIEW ALL OPTION) ====================
+    st.markdown('<div style="margin-top: 60px;"></div>', unsafe_allow_html=True)
+    
     st.markdown("""
     <div class="database-header">
         <h2 class="section-title">📊 Previous Detections (Database Records)</h2>
         <p style="color: #1E1E1E; font-size: 1.15rem; margin-top: 10px; font-weight: 600;">
-            All detection metadata stored in the cloud database
+            View detection metadata from the cloud database
         </p>
     </div>
     """, unsafe_allow_html=True)
-
+    
     try:
         if supabase is None:
             st.info("⚠️ Supabase database not configured. Only session data is available.")
         else:
-            with st.spinner("Loading previous detections from database..."):
-                data = fetch_all_detections("oil_detections")
+            # Add "View All Detections" button
+            col_view_option1, col_view_option2 = st.columns([1, 3])
             
-            if data and len(data) > 0:
-                df_supabase = pd.DataFrame(data)
+            with col_view_option1:
+                view_all_button = st.button("📋 View All Detections", use_container_width=True, type="primary")
+            
+            with col_view_option2:
+                st.markdown('<p style="color: #4A5568; font-size: 0.95rem; margin-top: 10px;">Click to view all previous detections or select a date below to filter</p>', unsafe_allow_html=True)
+            
+            # Load all detections
+            with st.spinner("Loading detections from database..."):
+                all_data = fetch_all_detections("oil_detections")
+            
+            if not all_data or len(all_data) == 0:
+                st.info("🔭 No detections found in the database. Upload and analyze images to populate the database.")
+                return
+            
+            # Extract unique dates
+            dates = sorted(set([d.get('timestamp', '')[:10] for d in all_data if d.get('timestamp')]), reverse=True)
+            
+            if not dates:
+                st.warning("⚠️ No valid dates found in detection records.")
+                return
+            
+            # Show data based on user choice
+            if view_all_button:
+                # VIEW ALL DETECTIONS
+                st.session_state['show_all_detections'] = True
+            
+            # Initialize session state for view all
+            if 'show_all_detections' not in st.session_state:
+                st.session_state['show_all_detections'] = False
+            
+            if st.session_state['show_all_detections']:
+                # Display ALL detections
+                st.markdown('<div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 20px 0;"><p style="color: #2e7d32; font-weight: 600; margin: 0;">📋 Viewing All Detections</p></div>', unsafe_allow_html=True)
+                
+                df_supabase = pd.DataFrame(all_data)
                 
                 if 'timestamp' in df_supabase.columns:
                     df_supabase['timestamp'] = pd.to_datetime(df_supabase['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -837,6 +1024,7 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
+                # Show dataframe with all detections
                 display_columns = []
                 column_config = {}
                 
@@ -875,13 +1063,13 @@ def main():
                     column_config=column_config
                 )
                 
-                col_db1, col_db2 = st.columns(2)
+                col_db1, col_db2, col_db3 = st.columns(3)
                 with col_db1:
                     csv_db = df_supabase.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         "📥 Export All Detections (CSV)",
                         data=csv_db,
-                        file_name=f'supabase_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv',
+                        file_name=f'all_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv',
                         mime='text/csv',
                         use_container_width=True
                     )
@@ -890,18 +1078,130 @@ def main():
                     st.download_button(
                         "📥 Export All Detections (JSON)",
                         data=json_db,
-                        file_name=f'supabase_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json',
+                        file_name=f'all_detections_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json',
                         mime='application/json',
                         use_container_width=True
                     )
+                with col_db3:
+                    if st.button("🔄 Back to Date Filter", use_container_width=True):
+                        st.session_state['show_all_detections'] = False
+                        st.rerun()
+            
             else:
-                st.info("🔭 No previous detections found in the database. Upload and analyze images to populate the database.")
+                # DATE FILTER MODE
+                st.markdown('<div class="filter-section">', unsafe_allow_html=True)
+                st.markdown('<h3>📅 Select Date to View Detections</h3>', unsafe_allow_html=True)
+                
+                selected_date = st.selectbox(
+                    "Choose a date:",
+                    options=["-- Select a Date --"] + dates,
+                    index=0,
+                    key="prev_detection_date_filter"
+                )
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # ONLY SHOW DATA IF DATE IS SELECTED
+                if selected_date == "-- Select a Date --":
+                    st.info("👆 Please select a date above to view detection records, or click 'View All Detections' button.")
+                else:
+                    # Filter data by selected date
+                    filtered_data = [d for d in all_data if d.get('timestamp', '').startswith(selected_date)]
+                    
+                    if not filtered_data:
+                        st.warning(f"No detections found for date: {selected_date}")
+                    else:
+                        # Convert to DataFrame
+                        df_supabase = pd.DataFrame(filtered_data)
+                        
+                        if 'timestamp' in df_supabase.columns:
+                            df_supabase['timestamp'] = pd.to_datetime(df_supabase['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                        
+                        if 'has_spill' in df_supabase.columns:
+                            df_supabase['result'] = df_supabase['has_spill'].apply(lambda x: 'Spill Detected ✅' if x else 'No Spill ❌')
+                        
+                        total_db_records = len(df_supabase)
+                        spills_in_db = df_supabase['has_spill'].sum() if 'has_spill' in df_supabase.columns else 0
+                        avg_coverage_db = df_supabase['coverage_percentage'].mean() if 'coverage_percentage' in df_supabase.columns else 0
+                        
+                        st.markdown(f"""
+                        <div class="db-stats">
+                            <div class="db-stat-box">
+                                <div class="db-stat-value">{total_db_records}</div>
+                                <div class="db-stat-label">Detections on {selected_date}</div>
+                            </div>
+                            <div class="db-stat-box">
+                                <div class="db-stat-value">{spills_in_db}</div>
+                                <div class="db-stat-label">Spills Detected</div>
+                            </div>
+                            <div class="db-stat-box">
+                                <div class="db-stat-value">{avg_coverage_db:.1f}%</div>
+                                <div class="db-stat-label">Avg Coverage</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        display_columns = []
+                        column_config = {}
+                        
+                        if 'timestamp' in df_supabase.columns:
+                            display_columns.append('timestamp')
+                            column_config['timestamp'] = st.column_config.TextColumn("Timestamp", width="medium")
+                        
+                        if 'filename' in df_supabase.columns:
+                            display_columns.append('filename')
+                            column_config['filename'] = st.column_config.TextColumn("Image File", width="medium")
+                        
+                        if 'result' in df_supabase.columns:
+                            display_columns.append('result')
+                            column_config['result'] = st.column_config.TextColumn("Result", width="small")
+                        
+                        if 'coverage_percentage' in df_supabase.columns:
+                            display_columns.append('coverage_percentage')
+                            column_config['coverage_percentage'] = st.column_config.NumberColumn("Coverage %", format="%.2f")
+                        
+                        if 'avg_confidence' in df_supabase.columns:
+                            display_columns.append('avg_confidence')
+                            column_config['avg_confidence'] = st.column_config.NumberColumn("Avg Confidence", format="%.3f")
+                        
+                        if 'max_confidence' in df_supabase.columns:
+                            display_columns.append('max_confidence')
+                            column_config['max_confidence'] = st.column_config.NumberColumn("Max Confidence", format="%.3f")
+                        
+                        if 'detected_pixels' in df_supabase.columns:
+                            display_columns.append('detected_pixels')
+                            column_config['detected_pixels'] = st.column_config.NumberColumn("Detected Pixels", format="%d")
+                        
+                        st.dataframe(
+                            df_supabase[display_columns] if display_columns else df_supabase,
+                            use_container_width=True,
+                            hide_index=True,
+                            column_config=column_config
+                        )
+                        
+                        col_db1, col_db2 = st.columns(2)
+                        with col_db1:
+                            csv_db = df_supabase.to_csv(index=False).encode('utf-8')
+                            st.download_button(
+                                f"📥 Export {selected_date} Detections (CSV)",
+                                data=csv_db,
+                                file_name=f'detections_{selected_date}.csv',
+                                mime='text/csv',
+                                use_container_width=True
+                            )
+                        with col_db2:
+                            json_db = df_supabase.to_json(orient='records', indent=2)
+                            st.download_button(
+                                f"📥 Export {selected_date} Detections (JSON)",
+                                data=json_db,
+                                file_name=f'detections_{selected_date}.json',
+                                mime='application/json',
+                                use_container_width=True
+                            )
     
     except Exception as e:
         st.error(f"❌ Error loading previous detections: {str(e)}")
         print(f"Database error: {e}")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # ==================== FOOTER ====================
     st.markdown("""
