@@ -149,6 +149,10 @@ Input Image → Preprocessing → U-Net Model → Segmentation → Post-processi
 - Configured GPU environment with TensorFlow 2.19 and mixed precision training.
 
 **Results:**
+
+### 🔹 Dataset Distribution
+![Dataset Distribution](outputs/dataset_distribution.png)
+
 ```
 ✓ GPU Configured: PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')
 ✓ TensorFlow Version: 2.19.0
@@ -168,7 +172,10 @@ DIRECTORY VERIFICATION:
 - Batch Size: 8
 - Epochs: 30
 - Learning Rate: 0.0001
-- Mixed Precision: Enabled for faster training
+- Mixed Precision: Enabled for faster training.
+
+### 🔹 Dataset Loading
+![Dataset Loading](outputs/dataset_loading.png)
 
 ---
 
@@ -197,6 +204,8 @@ DIRECTORY VERIFICATION:
 4. Brightness Distribution
 5. Contrast Distribution
 
+### 🔹 Oil Spill Distribution
+![Oil Spill Distribution](outputs/oill-spill-distribution.png)
 ---
 
 ### Module 3: Model Development 🧠
@@ -220,6 +229,9 @@ DIRECTORY VERIFICATION:
 | **Total Layers** | 122 |
 | **Loss Function** | Combined Binary Cross-Entropy + Dice Loss |
 | **Metrics** | Accuracy, Dice Coefficient, IoU, Precision, Recall |
+
+### 🔹 Model Layer Distribution
+![Model Layer Distribution](outputs/model-layer-distribution.png)
 
 **Key Innovations:**
 - **Attention Gates:** Focus on relevant features, suppress noise
@@ -253,6 +265,9 @@ Monitoring Metric: Dice Coefficient
 6. TensorBoard - Visual monitoring
 7. Early Stopping - Patience=20, min_delta=0.0001
 
+### 🔹 Learning Rate Schedule
+![Learning Rate Schedule](outputs/Learning-rate-schedule.png)
+
 **Training Progress:**
 
 | Phase | Epochs | Val Dice Score | Improvement |
@@ -272,6 +287,8 @@ Monitoring Metric: Dice Coefficient
 - Precision & Recall Curves
 - Learning Rate Schedule
 
+### 🔹 Model Prediction
+![Model Prediction](outputs/model-prediction.png)
 ---
 
 ### Module 5: Visualization of Results 🎨
@@ -293,6 +310,12 @@ True Negatives (TN):  5,000,558
 False Positives (FP):   297,551
 False Negatives (FN):   425,097
 ```
+### 🔹 Confusion Matrix
+![Confusion Matrix](outputs/confusion-matrix.png)
+
+### 🔹 Heatmap
+![Heatmap](outputs/heatmap.png)
+
 
 **Visualization Theme:**
 - **Confidence Map:** YlOrRd colormap (yellow→red = increasing confidence)
@@ -305,11 +328,17 @@ False Negatives (FN):   425,097
 3. **Quality Heatmap** - IoU-based segmentation quality analysis
 4. **Best vs Worst Predictions** - Top 5 best & bottom 5 worst segmentations
 
+### 🔹 Loss, Accuracy, Dice Coefficient, IoU, Precision and Recall
+![Loss Accuracy Dice](outputs/loss-accuracy-dice.png)
+
 **Key Insights:**
 - ✅ Achieved 94.57% overall accuracy
 - ✅ 96% precision → Very low false alarm rate
 - ✅ F1-Score 95.45% → Excellent balance
 - ✅ High segmentation quality suitable for real-world deployment
+
+### 🔹 Best vs Worst Predictions
+![Best vs Worst](outputs/best-vs-worst.png)
 
 ---
 
@@ -479,15 +508,6 @@ False Negatives (FN):   425,097
 | **Recall** | 94.69% | Detects 95% of actual spills |
 | **F1-Score** | 95.45% | Excellent balance |
 | **Specificity** | 94.38% | High true negative rate |
-
-### Confusion Matrix Analysis
-
-```
-True Positives:  7,580,602   (Correctly identified spill pixels)
-True Negatives:  5,000,558   (Correctly identified clean pixels)
-False Positives:   297,551   (False alarms - 4% of predictions)
-False Negatives:   425,097   (Missed spills - 5% of actual spills)
-```
 
 ### Performance Highlights
 
@@ -687,8 +707,30 @@ Our model successfully detects oil spills with high accuracy and provides multip
 - Quality heatmaps (IoU-based)
 - Best vs worst predictions comparison
 - Statistical distribution charts
-
 ---
+
+### 🔹 What is HydroVexel
+![Best vs Worst](outputs/output1.png)
+
+### 🔹 Oil Spill Insight — What It Is, Why Early Detection Matters, and How AI Helps
+![Best vs Worst](outputs/output2.png)
+
+### 🔹 Upload Section
+![Best vs Worst](outputs/output3.png)
+
+### 🔹 Detection Output
+![Best vs Worst](outputs/output4.png)
+
+### 🔹 Analysis Section
+![Best vs Worst](outputs/output5.png)
+
+### 🔹 Live Detection Database
+![Best vs Worst](outputs/output6.png)
+
+### 🔹 All Past Detections
+![Best vs Worst](outputs/output7.png)
+
+
 
 ## 1. Access the Website
 Go to [https://hydrovexel.streamlit.app/](https://hydrovexel.streamlit.app/) using any web browser.  
