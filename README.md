@@ -146,7 +146,7 @@ Input Image → Preprocessing → U-Net Model → Segmentation → Post-processi
 **What I Did:**
 - Sourced Oil Spill Detection Dataset from [Zenodo](https://zenodo.org/records/10555314)
 - Organized data into train/validation/test splits with corresponding segmentation masks
-- Configured GPU environment with TensorFlow 2.19 and mixed precision training
+- Configured GPU environment with TensorFlow 2.19 and mixed precision training.
 
 **Results:**
 ```
