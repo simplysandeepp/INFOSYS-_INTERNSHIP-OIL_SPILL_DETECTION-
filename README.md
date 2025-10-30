@@ -287,8 +287,8 @@ Monitoring Metric: Dice Coefficient
 - Precision & Recall Curves
 - Learning Rate Schedule
 
-### 🔹 Model Prediction
-![Model Prediction](outputs/model-prediction.png)
+### 🔹 Loss, Accuracy, Dice Coefficient, IoU, Precision and Recall
+![Loss Accuracy Dice](outputs/loss-accuracy-dice.png)
 ---
 
 ### Module 5: Visualization of Results 🎨
@@ -328,8 +328,6 @@ False Negatives (FN):   425,097
 3. **Quality Heatmap** - IoU-based segmentation quality analysis
 4. **Best vs Worst Predictions** - Top 5 best & bottom 5 worst segmentations
 
-### 🔹 Loss, Accuracy, Dice Coefficient, IoU, Precision and Recall
-![Loss Accuracy Dice](outputs/loss-accuracy-dice.png)
 
 **Key Insights:**
 - ✅ Achieved 94.57% overall accuracy
@@ -337,9 +335,11 @@ False Negatives (FN):   425,097
 - ✅ F1-Score 95.45% → Excellent balance
 - ✅ High segmentation quality suitable for real-world deployment
 
+### 🔹 Model Prediction
+![Model Prediction](outputs/model-prediction.png)
+
 ### 🔹 Best vs Worst Predictions
 ![Best vs Worst](outputs/best-vs-worst.png)
-
 ---
 
 ### Module 6: Deployment via Streamlit App 🚀
@@ -663,51 +663,6 @@ HYDROVEXEL/
 ├── requirements.txt            # Python dependencies
 └── streamlit_app.py            # Main application entry point
 ```
-
----
-## 🎨 Results & Visualizations
-
-### Sample Detection Results
-
-Our model successfully detects oil spills with high accuracy and provides multiple visualization formats:
-
-**1. Detection Overlay**
-- Original image with colored spill regions
-- Red highlighting for detected oil spills
-- Semi-transparent overlay for context
-
-**2. Confidence Heatmap**
-- Color-coded confidence levels
-- Yellow → Orange → Red (low to high confidence)
-- Helps identify high-certainty detections
-
-**3. Binary Segmentation Mask**
-- Black & white output
-- White = Oil spill detected
-- Black = Clean water
-
-**4. Metrics Dashboard**
-- Coverage percentage
-- Average confidence score
-- Maximum confidence
-- Pixel counts
-
-### Training Visualizations
-
-**Performance Graphs:**
-- Loss curves (training vs validation)
-- Accuracy progression over epochs
-- Dice coefficient evolution
-- IoU tracking
-- Precision & recall curves
-- Learning rate schedule
-
-**Evaluation Visualizations:**
-- Confusion matrices (absolute & normalized)
-- Quality heatmaps (IoU-based)
-- Best vs worst predictions comparison
-- Statistical distribution charts
----
 
 ### 🔹 What is HydroVexel
 ![Best vs Worst](outputs/output1.png)
