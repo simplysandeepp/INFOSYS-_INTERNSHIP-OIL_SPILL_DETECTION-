@@ -1,5 +1,5 @@
 # ============================================================================
-# STREAMLIT_APP.PY - Premium Crystal UI Version (FIXED)
+# STREAMLIT_APP.PY - Premium Crystal UI Version (ENHANCED WITH REFINED DETECTION)
 # ============================================================================
 
 import streamlit as st
@@ -113,9 +113,6 @@ inject_ocean_ui()
 
 
 # ------------------------ PREMIUM CRYSTAL BLUE STYLES ----------------------
-import streamlit as st
-from pathlib import Path
-
 BASE_DIR = Path(__file__).parent
 css_file = BASE_DIR / "styles" / "styles2.css"
 
@@ -123,6 +120,212 @@ if css_file.exists():
     with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+
+# ============================================================================
+# REFINED SPILL DETECTION LOGIC - Enhanced Alert System
+# ============================================================================
+
+def get_detection_status_enhanced(coverage_percentage):
+    """
+    Enhanced detection status with refined threshold logic
+    
+    Args:
+        coverage_percentage: Float value of spill coverage
+        
+    Returns:
+        dict: Contains status, color, icon, message, and alert_level
+    """
+    if coverage_percentage < 2.0:
+        # Clear Image Mode (0% - 2%)
+        return {
+            'status': 'CLEAR',
+            'color': '#10B981',  # Green
+            'bg_gradient': 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            'icon': '✅',
+            'title': 'NO OIL SPILL DETECTED',
+            'message': 'Water looks clean — No immediate action required',
+            'alert_level': 'success',
+            'recommendation': 'Continue routine monitoring of the area.'
+        }
+    elif 2.0 <= coverage_percentage < 10.0:
+        # Minor Traces Mode (2% - 9%)
+        return {
+            'status': 'MINOR_TRACES',
+            'color': '#F59E0B',  # Amber/Yellow
+            'bg_gradient': 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+            'icon': '⚠️',
+            'title': 'SLIGHT OIL TRACES DETECTED',
+            'message': 'Minor contamination detected — Recommend re-check or continuous monitoring',
+            'alert_level': 'warning',
+            'recommendation': 'Schedule follow-up analysis within 24-48 hours. Monitor for changes.'
+        }
+    else:
+        # Alert Mode (≥10%)
+        return {
+            'status': 'ALERT',
+            'color': '#EF4444',  # Red
+            'bg_gradient': 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+            'icon': '🚨',
+            'title': 'SIGNIFICANT OIL SPILL DETECTED',
+            'message': 'Major contamination detected — IMMEDIATE ATTENTION REQUIRED!',
+            'alert_level': 'critical',
+            'recommendation': 'Deploy cleanup crews immediately. Establish containment perimeter. Contact environmental response team.'
+        }
+
+
+def display_enhanced_detection_status(results, uploaded_filename):
+    """
+    Display enhanced detection status with refined threshold logic
+    """
+    coverage_pct = results['metrics']['coverage_percentage']
+    status_info = get_detection_status_enhanced(coverage_pct)
+    
+    # Animated Alert Banner with Glassmorphism
+    st.markdown(f"""
+    <style>
+        @keyframes pulse-border {{
+            0%, 100% {{ box-shadow: 0 0 0 0 {status_info['color']}80; }}
+            50% {{ box-shadow: 0 0 0 15px {status_info['color']}00; }}
+        }}
+        
+        .enhanced-alert-banner {{
+            background: {status_info['bg_gradient']};
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: pulse-border 2s infinite;
+            backdrop-filter: blur(10px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }}
+        
+        .alert-icon {{
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: block;
+            animation: bounce 1s infinite;
+        }}
+        
+        @keyframes bounce {{
+            0%, 100% {{ transform: translateY(0); }}
+            50% {{ transform: translateY(-10px); }}
+        }}
+        
+        .alert-title {{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin: 15px 0;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }}
+        
+        .alert-message {{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 15px 0;
+            line-height: 1.6;
+        }}
+        
+        .coverage-display {{
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }}
+        
+        .coverage-value {{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+        }}
+        
+        .coverage-label {{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 5px;
+            opacity: 0.9;
+        }}
+        
+        .recommendation-box {{
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+        }}
+        
+        .recommendation-text {{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.7;
+            margin: 0;
+        }}
+    </style>
+    
+    <div class="enhanced-alert-banner">
+        <span class="alert-icon">{status_info['icon']}</span>
+        <div class="alert-title">{status_info['title']}</div>
+        <div class="alert-message">{status_info['message']}</div>
+        
+        <div class="coverage-display">
+            <div class="coverage-value">{coverage_pct:.2f}%</div>
+            <div class="coverage-label">Spill Coverage Area</div>
+        </div>
+        
+        <div class="recommendation-box">
+            <p class="recommendation-text">
+                <strong>📋 Recommendation:</strong><br>
+                {status_info['recommendation']}
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Additional context based on alert level
+    if status_info['alert_level'] == 'critical':
+        st.markdown("""
+        <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; 
+                    border-left: 5px solid #EF4444; margin: 20px 0;">
+            <h4 style="color: #EF4444; margin: 0 0 10px 0; font-family: Poppins;">
+                🚨 CRITICAL ALERT - Emergency Response Required
+            </h4>
+            <p style="color: #1E1E1E; font-size: 1rem; margin: 0; line-height: 1.6;">
+                This detection indicates a significant environmental threat. Contact your local 
+                environmental protection agency and deploy response teams immediately. Time is critical 
+                for effective containment and cleanup operations.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    elif status_info['alert_level'] == 'warning':
+        st.markdown("""
+        <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; 
+                    border-left: 5px solid #F59E0B; margin: 20px 0;">
+            <h4 style="color: #D97706; margin: 0 0 10px 0; font-family: Poppins;">
+                ⚠️ MONITORING ADVISORY
+            </h4>
+            <p style="color: #1E1E1E; font-size: 1rem; margin: 0; line-height: 1.6;">
+                Minor oil traces detected. While not immediately critical, this warrants attention. 
+                Consider conducting additional satellite passes or deploying surveillance drones to 
+                confirm and track any changes in contamination levels.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ------------------------ DATABASE HELPERS ---------------------------------
 def init_database():
